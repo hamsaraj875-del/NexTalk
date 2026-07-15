@@ -9,10 +9,13 @@ dotenv.config();
 
 //Internal modules
 
+const Port = process.env.PORT || 3000;
+const Db = process.env.DB;
 
-mongoose.connect(process.env.DB).then(()=>{
+
+mongoose.connect(Db).then(()=>{
   console.log("Server and database are connected successfully");
-  app.listen(process.env.PORT,()=>{
+  app.listen(Port,()=>{
     console.log(`Server is running in the http://localhost:${3000}`);
   });
 });
