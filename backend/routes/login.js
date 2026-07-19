@@ -6,3 +6,8 @@ const login = express.Router();
 
 //internal modules
 
+const loginController = require("../controller/loginController");
+
+
+login.post("/login",loginController.login);
+login.post("/signUp",loginController.signUp);

@@ -13,9 +13,9 @@ const Friends = () => {
   ];
 
   return (
-    <div className="w-full h-screen bg-[#0F071C] text-white border-r border-gray-900 flex flex-col">
+    <div className="w-full h-screen bg-black text-white border-r border-gray-900 flex flex-col">
 
-      <div className="sticky top-0 z-10 bg-[#0F071C] p-4 border-b border-[#221339]">
+      <div className="sticky top-0 z-10 bg-black p-4 border-b border-[#221339]">
         <input
           type="text"
           placeholder="Search friends..."
@@ -28,17 +28,17 @@ const Friends = () => {
         {friendsList.map((person, index) => (
           <div
             key={index}
-            className="group flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition-all duration-300 hover:bg-[#1A1030]"
+            className="group flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition-all duration-300 hover:bg-[#120430]"
           >
             <div className="relative">
               <img
                 src="logo.png"
                 alt=""
-                className="w-12 h-12 rounded-full object-cover"
+                className="w-12 h-12 object-cover rounded-full"
               />
 
               {person.online && (
-                <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-[#0F071C] animate-ping" />
+                <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-[#0F071C] " />
               )}
             </div>
 
@@ -48,12 +48,12 @@ const Friends = () => {
                   {person.name}
                 </h2>
 
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-gray-500">
                   {person.time}
                 </span>
               </div>
 
-              <p className="text-sm text-gray-400 truncate">
+              <p className="text-sm text-gray-500 truncate">
                 {person.mes}
               </p>
             </div>

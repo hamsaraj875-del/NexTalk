@@ -10,6 +10,7 @@ dotenv.config();
 
 //Internal modules
 
+const login = require("../routes/login");
 const Port = process.env.PORT || 3000;
 const Db = process.env.DB;
 
@@ -32,6 +33,10 @@ app.use(session({
     maxAge:1000*60*60*24*5
   }
 }));
+
+// Router usage
+
+app.use("login",login);
 
 
 

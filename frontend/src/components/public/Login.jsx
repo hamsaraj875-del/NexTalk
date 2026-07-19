@@ -5,6 +5,14 @@ import { MdMarkEmailRead } from "react-icons/md";
 
 const Login = () => {
   const [userState, setSign] = useState("sign");
+
+  const submitHandler = (e)=>{
+    e.preventDefault;
+
+    
+
+  }
+
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
       <header className="py-8 flex justify-center items-center gap-4">
@@ -18,7 +26,7 @@ const Login = () => {
       <main className="flex-1 flex">
         <div className="w-1/2 flex justify-center items-center">
           {userState == "sign" && (
-            <form className="w-[420px] flex flex-col gap-6">
+            <form onSubmit={(e)=>submitHandler()} className="w-[420px] flex flex-col gap-6">
               <div className="text-center">
                 <h2 className="text-3xl font-semibold">Create Account</h2>
                 <p className="text-gray-400 mt-1">Sign up for a new account</p>
@@ -65,7 +73,7 @@ const Login = () => {
                 </div>
               </div>
 
-              <button className="h-12 rounded-xl bg-cyan-400 hover:bg-cyan-500 text-black font-semibold transition">
+              <button type="submit" className="h-12 rounded-xl bg-cyan-400 hover:bg-cyan-500 text-black font-semibold transition">
                 Create Account
               </button>
 
@@ -129,7 +137,7 @@ const Login = () => {
 
         <div className="w-1/2 flex justify-center items-center">
           <img
-            src="image.png"
+            src="login.png"
             alt="Illustration"
             className="w-[100%] max-w-[800px] h-auto object-contain"
           />
