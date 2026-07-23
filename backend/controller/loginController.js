@@ -1,7 +1,7 @@
 //external modules
 const bcrypt = require("bcrypt");
 const { check, validationResult } = require("express-validator");
-const {Resend} = require("resend");
+const { Resend } = require("resend");
 
 //internal modules
 const database = require("../models/database");
@@ -12,19 +12,19 @@ const resend = new Resend(process.env.RESEND_API);
 //user signup
 
 exports.signUp = [
-  check("name")
+  check("data.name")
     .notEmpty()
     .withMessage("Name field cannot be empty")
     .matches(/^[a-zA-Z\s]+$/)
     .withMessage("Name cannot contain speacial characters"),
 
-  check("email")
-    .isEmail()
-    .withMessage("Enter a valid email id")
+  check("data.email")
     .notEmpty()
-    .withMessage("email field cannot be empty"),
+    .withMessage("email field cannot be empty")
+    .isEmail()
+    .withMessage("Enter a valid email id"),
 
-  check("password")
+  check("data.password")
     .isLength({ min: 8 })
     .withMessage("Password should have at least 8 characters")
     .matches(/[a-z]/)
@@ -33,10 +33,10 @@ exports.signUp = [
     .withMessage("password should have upper case")
     .matches(/[0-9]/)
     .withMessage("password should have digits")
-    .matches(/[^a-zA-Z]/)
+    .matches(/[^a-zA-Z0-9]/)
     .withMessage("password should have special characters"),
   async (req, res, next) => {
-    const { name, email, password } = req.body;
+
     const errors = validationResult(req);
 
     formattedError = {
@@ -45,15 +45,22 @@ exports.signUp = [
       password: null,
     };
 
+
     if (!errors.isEmpty()) {
       errors.array().forEach((err) => {
         if (!formattedError[err.path]) {
           formattedError[err.path] = err.msg;
         }
       });
+      return res.status(400).json({
+        success: false,
+        message: formattedError,
+      });
     }
     if (errors.isEmpty()) {
       try {
+        const {name,email,password} = req.body.data;
+        console.log(req.body);
         const user = await database.findOne({ email: email });
         if (user) {
           return res.status(409).json({

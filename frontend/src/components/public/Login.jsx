@@ -13,6 +13,7 @@ import ErrorMessage from "../common/ErrorMessage";
 const Login = () => {
   const navigate = useNavigate();
   const [err, setErr] = useState("");
+  const [validationError, setValidationError] = useState({});
   const [userState, setSign] = useState("signUp");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -20,7 +21,12 @@ const Login = () => {
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    const data = { name: name, email: email, password: password };
+    let data = {};
+    if (userState === "signUp") {
+      data = { name: name, email: email, password: password };
+    } else {
+      data = { name: name, email: email };
+    }
     try {
       const response = await fetch(
         `${import.meta.env.VITE_LINK}/auth/${userState}`,
@@ -28,20 +34,17 @@ const Login = () => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            state: userState,
-            data,
+            data
           }),
         },
       );
 
       const result = await response.json();
-      console.log(result);
 
       if (response.ok) {
-        navigate("../chat");
+        navigate("auth/otp");
       } else {
-        const status = (await response).json();
-        setErr(status.mes);
+        setValidationError(result.message);
       }
     } catch {
       setErr("Server error occured ! please try again");
@@ -85,6 +88,9 @@ const Login = () => {
                     required
                   />
                 </div>
+                {validationError.name && (
+                  <p className="text-red-500 ">{validationError.name}</p>
+                )}
               </div>
               <div>
                 <label className="mb-2 block">Email</label>
@@ -101,6 +107,9 @@ const Login = () => {
                     required
                   />
                 </div>
+                {validationError?.email && (
+                  <p className="text-red-500 ">{validationError.email}</p>
+                )}
               </div>
 
               <div>
@@ -118,6 +127,10 @@ const Login = () => {
                     required
                   />
                 </div>
+
+                {validationError.password && (
+                  <p className="text-red-500 ">{validationError.password}</p>
+                )}
               </div>
 
               {err && <ErrorMessage message={err} />}
@@ -139,7 +152,10 @@ const Login = () => {
             </form>
           )}
           {userState == "login" && (
-            <form onSubmit={submitHandler} className="w-[420px] flex flex-col gap-6">
+            <form
+              onSubmit={submitHandler}
+              className="w-[420px] flex flex-col gap-6"
+            >
               <div className="text-center">
                 <h2 className="text-3xl font-semibold">Create Account</h2>
                 <p className="text-gray-400 mt-1">Login for your account</p>
@@ -180,9 +196,7 @@ const Login = () => {
 
               {err && <ErrorMessage message={err} />}
 
-              <button
-                className="h-12 rounded-xl bg-cyan-400 hover:bg-cyan-500 text-black font-semibold transition"
-              >
+              <button className="h-12 rounded-xl bg-cyan-400 hover:bg-cyan-500 text-black font-semibold transition">
                 Login
               </button>
 
