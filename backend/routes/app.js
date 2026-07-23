@@ -5,23 +5,31 @@ const express = require("express");
 const app = express();
 const dotenv = require("dotenv");
 const session = require("express-session");
+const {MongoStore} = require("connect-mongo")
+const cors = require("cors");
 dotenv.config();
 
 
 //Internal modules
 
-const login = require("../routes/login");
+const login = require("./login");
 const Port = process.env.PORT || 3000;
 const Db = process.env.DB;
 
 
 //Session handling
 
-const store = new monogoDBStore({
-  uri:process.env.DB,
-  collection:'session',
-  expires:60*60*24*5,
+const store = MongoStore.create({
+  mongoUrl: process.env.DB,
+  collectionName: "sessions",
+  ttl: 60 * 60 * 24 * 5,
 });
+
+app.use(cors({
+  origin:"http://localhost:5173",
+  credentials:true,
+})
+)
 
 app.use(session({
   secret:process.env.SECRET_KEY,
@@ -36,8 +44,8 @@ app.use(session({
 
 // Router usage
 
-app.use("login",login);
-
+app.use(express.json());
+app.use("/auth",login);
 
 
 mongoose.connect(Db).then(()=>{

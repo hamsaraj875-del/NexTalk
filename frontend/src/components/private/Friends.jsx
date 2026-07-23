@@ -1,4 +1,4 @@
-const Friends = () => {
+const Friends = ({setFriend}) => {
   const friendsList = [
     { name: "Riya", time: "12:30 AM", mes: "How are you ?", online: true, unread: 2 },
     { name: "Raj", time: "Yesterday", mes: "Nothing", online: false, unread: 0 },
@@ -28,6 +28,7 @@ const Friends = () => {
         {friendsList.map((person, index) => (
           <div
             key={index}
+            onClick={()=>setFriend(person.name)}
             className="group flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition-all duration-300 hover:bg-[#120430]"
           >
             <div className="relative">

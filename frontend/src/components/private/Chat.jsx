@@ -1,7 +1,8 @@
 import {useState} from "react";
 import Friends from "./Friends";
 import Sidebar from "./Sidebar";
-import Messages from "../private/Messages"
+import Messages from "../private/Messages";
+import ChatContent from "../private/ChatContent";
 import Otp from "../public/Otp";
 
 const Chat = () => {
@@ -13,12 +14,7 @@ const Chat = () => {
           <div className={`h-full ${adjust?' w-[5%]':'w-[18%]'} transition-all duration-400 ease-in-out flex flex-col justify-between`}>
             <Sidebar setAdjust={setAdjust} />
           </div>
-          <div className="h-full w-[25%] flex flex-col">
-            <Friends />
-          </div>
-          <div>
-            <Messages />
-          </div>
+          <ChatContent className={`h-full `} />
         </div>
       </div>
     </>

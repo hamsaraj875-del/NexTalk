@@ -11,3 +11,5 @@ const loginController = require("../controller/loginController");
 
 login.post("/login",loginController.login);
 login.post("/signUp",loginController.signUp);
+
+module.exports = login;
