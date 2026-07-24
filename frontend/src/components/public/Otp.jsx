@@ -1,7 +1,15 @@
+//external modules
+
 import { useState } from "react";
+import {useNavigate} from "react-router-dom";
+
+//files modules
+import ErrorMessage from "../common/ErrorMessage";
 
 const VerifyOTP = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [err ,setErr] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (value, index) => {
     if (!/^\d?$/.test(value)) return;
@@ -21,8 +29,35 @@ const VerifyOTP = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
+    console.log(otp);
+    const otpStr = otp.join("");
+    console.log(otpStr);
+    if(otp.length==0){
+      return;
+    }
+    try{
+      console.log("sending ...")
+      const response = await fetch(`${import.meta.env.VITE_LINK}/auth/otp`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({otpStr}),
+        credentials:"include"
+      })
+      console.log("waiting")
+      const result = await response.json();
+      console.log(result);
+      if(result.successs){
+        navigate("../../chat");
+      }else{
+        setErr(result.message);
+      }
+    }
+    catch(err){
+      console.log(err);
+      setErr("Server error please try again");
+    }
   };
 
   return (
@@ -77,6 +112,7 @@ const VerifyOTP = () => {
           </button>
 
         </div>
+        {err.length!=0 &&  <ErrorMessage message={err} />}
 
       </div>
     </div>

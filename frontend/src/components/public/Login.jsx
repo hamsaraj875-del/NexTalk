@@ -9,9 +9,11 @@ import { MdMarkEmailRead } from "react-icons/md";
 
 //files import
 import ErrorMessage from "../common/ErrorMessage";
+import MainLoader from "../common/MainLoader";
 
 const Login = () => {
   const navigate = useNavigate();
+  const [loader ,setLoader] = useState(false);
   const [err, setErr] = useState("");
   const [validationError, setValidationError] = useState({});
   const [userState, setSign] = useState("signUp");
@@ -21,11 +23,14 @@ const Login = () => {
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    let data = {};
-    if (userState === "signUp") {
-      data = { name: name, email: email, password: password };
-    } else {
-      data = { name: name, email: email };
+    setLoader(true);
+    if(userState==="login" && (email.length==0 || password.length==0)){
+      setErr("Input fields cannot be empty")
+      return;
+    }
+    if(userState==="signUp" && (name.length==0 || email.length==0 || password.length==0)){
+      setErr("Input fields cannot be empty")
+      return;
     }
     try {
       const response = await fetch(
@@ -34,24 +39,28 @@ const Login = () => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            data
+            name,email,password
           }),
         },
       );
 
       const result = await response.json();
 
-      if (response.ok) {
-        navigate("auth/otp");
+      if (result.success) {
+        navigate("../otp");
       } else {
         setValidationError(result.message);
       }
+      console.log(validationError);
     } catch {
       setErr("Server error occured ! please try again");
+    }finally{
+      setLoader(false);
     }
   };
 
   return (
+    <>
     <div className="h-screen bg-black text-white flex flex-col">
       <header className="py-8 flex justify-center items-center gap-4">
         <FiMessageCircle className="text-purple-500" size={50} />
@@ -220,6 +229,12 @@ const Login = () => {
         </div>
       </main>
     </div>
+    {loader && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+    <MainLoader />
+  </div>
+)}
+    </>
   );
 };
 

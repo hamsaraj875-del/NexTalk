@@ -1,30 +1,29 @@
 //external modules
 const bcrypt = require("bcrypt");
 const { check, validationResult } = require("express-validator");
-const { Resend } = require("resend");
+const nodemailer = require("nodemailer");
 
 //internal modules
 const database = require("../models/database");
-const resend = new Resend(process.env.RESEND_API);
 
 //router handling functions
 
 //user signup
 
 exports.signUp = [
-  check("data.name")
+  check("name")
     .notEmpty()
     .withMessage("Name field cannot be empty")
     .matches(/^[a-zA-Z\s]+$/)
     .withMessage("Name cannot contain speacial characters"),
 
-  check("data.email")
+  check("email")
     .notEmpty()
     .withMessage("email field cannot be empty")
     .isEmail()
     .withMessage("Enter a valid email id"),
 
-  check("data.password")
+  check("password")
     .isLength({ min: 8 })
     .withMessage("Password should have at least 8 characters")
     .matches(/[a-z]/)
@@ -36,7 +35,6 @@ exports.signUp = [
     .matches(/[^a-zA-Z0-9]/)
     .withMessage("password should have special characters"),
   async (req, res, next) => {
-
     const errors = validationResult(req);
 
     formattedError = {
@@ -44,7 +42,6 @@ exports.signUp = [
       email: null,
       password: null,
     };
-
 
     if (!errors.isEmpty()) {
       errors.array().forEach((err) => {
@@ -59,7 +56,7 @@ exports.signUp = [
     }
     if (errors.isEmpty()) {
       try {
-        const {name,email,password} = req.body.data;
+        const { name, email, password } = req.body;
         console.log(req.body);
         const user = await database.findOne({ email: email });
         if (user) {
@@ -69,13 +66,34 @@ exports.signUp = [
           });
         } else {
           req.session.userDetails = { name, email, password };
-          req.session.otp = otpGenerator();
+          const otp = otpGenerator();
+          try {
+            console.log(otp);
+            req.session.otp = otp;
+            await req.session.save();
+
+            await req.session.save();
+            await sendOTP(email, otp);
+            return res.status(201).json({
+              success: true,
+              message: "Otp is sent to the email please check the jmail",
+            });
+          } catch {
+            console.log(err);
+            return res.status(500).json({
+              success: false,
+              message:
+                "Error occurred while sending the email please try again ",
+            });
+          }
+
           return res.status(201).json({
             success: true,
             message: "Successfully created the account",
           });
         }
       } catch (err) {
+        console.log(err);
         return res.status(500).json({
           success: false,
           message: "Internal server error",
@@ -113,40 +131,61 @@ exports.login = async (req, res, next) => {
 
 //otp generator
 const otpGenerator = () => {
-  return Math.floor(100000 + Math.random() * 9000000);
+  return Math.floor(100000 + Math.random() * 900000);
 };
 
 //OTP sender by resend
 
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_APP_PASSWORD,
+  },
+});
+
 const sendOTP = async (email, otp) => {
   try {
-    const response = await resend.emails.send({
-      from: "NexTalk <onboarding@resend.dev>",
+    const response = await transporter.sendMail({
+      from: `"NexTalk" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Verify Your NexTalk Account",
+
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
-          <h2 style="color: #2563eb; text-align: center;">NexTalk</h2>
+          
+          <h2 style="color: #2563eb; text-align: center;">
+            NexTalk
+          </h2>
 
           <p>Hello,</p>
 
-          <p>Thank you for signing up for <strong>NexTalk</strong>.</p>
+          <p>
+            Thank you for signing up for <strong>NexTalk</strong>.
+          </p>
 
-          <p>Your One-Time Password (OTP) is:</p>
+          <p>
+            Your One-Time Password (OTP) is:
+          </p>
 
           <h1 style="text-align: center; color: #2563eb; letter-spacing: 5px;">
             ${otp}
           </h1>
 
-          <p>This OTP is valid for <strong>5 minutes</strong>.</p>
+          <p>
+            This OTP is valid for <strong>5 minutes</strong>.
+          </p>
 
-          <p>If you didn't request this verification, you can safely ignore this email.</p>
+          <p>
+            If you didn't request this verification, you can safely ignore this email.
+          </p>
 
           <hr>
 
           <p style="font-size: 12px; color: #666; text-align: center;">
             © ${new Date().getFullYear()} NexTalk. All rights reserved.
           </p>
+
         </div>
       `,
     });
@@ -161,7 +200,7 @@ const sendOTP = async (email, otp) => {
 //otp page handler
 
 exports.otp = async (req, res, next) => {
-  const data = req.body;
+  const data = req.body.otpStr;
   if (data == req.session.otp) {
     const name = req.session.userDetails.name;
     const email = req.session.userDetails;
@@ -181,5 +220,11 @@ exports.otp = async (req, res, next) => {
         message: "Error occurred while signing in please try again later",
       });
     }
+  } else {
+    console.log(req.session.otp);
+    return res.status(500).json({
+      successs: false,
+      message: "Invalid otp ",
+    });
   }
 };
