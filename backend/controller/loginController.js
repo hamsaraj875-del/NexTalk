@@ -57,21 +57,18 @@ exports.signUp = [
     if (errors.isEmpty()) {
       try {
         const { name, email, password } = req.body;
-        console.log(req.body);
         const user = await database.findOne({ email: email });
         if (user) {
           return res.status(409).json({
             success: false,
+            validationError:false,
             message: "user already exists",
           });
         } else {
           req.session.userDetails = { name, email, password };
           const otp = otpGenerator();
           try {
-            console.log(otp);
             req.session.otp = otp;
-            await req.session.save();
-
             await req.session.save();
             await sendOTP(email, otp);
             return res.status(201).json({
@@ -82,20 +79,17 @@ exports.signUp = [
             console.log(err);
             return res.status(500).json({
               success: false,
+              validationError:false,
               message:
                 "Error occurred while sending the email please try again ",
             });
           }
-
-          return res.status(201).json({
-            success: true,
-            message: "Successfully created the account",
-          });
         }
       } catch (err) {
         console.log(err);
         return res.status(500).json({
           success: false,
+          validationError:false,
           message: "Internal server error",
         });
       }
@@ -111,19 +105,23 @@ exports.login = async (req, res, next) => {
   try {
     const user = await database.findOne({ email: email });
     if (user && (await bcrypt.compare(password, user.password))) {
+      req.session.isLoggedIn = true;
+      await req.session.save();
       return res.status(200).json({
         success: true,
         message: "Successfully logged in",
       });
     } else {
       return res.status(500).json({
-        success: true,
+        success: false,
+        validationError:false,
         message: "Unauthorized access please sign up first",
       });
     }
   } catch (err) {
     return res.status(201).json({
       success: false,
+      validationError:false,
       message: "Error occured try again later",
     });
   }
@@ -200,31 +198,39 @@ const sendOTP = async (email, otp) => {
 //otp page handler
 
 exports.otp = async (req, res, next) => {
-  const data = req.body.otpStr;
-  if (data == req.session.otp) {
-    const name = req.session.userDetails.name;
-    const email = req.session.userDetails;
-    const pass = req.session.password;
-
-    try {
-      const password = await bcrypt.hash(pass);
-      const details = new database({ name, email, password });
-      await details.save();
-      return res.status(200).json({
-        success: true,
-        message: "Logged in successfully",
-      });
-    } catch (err) {
-      return res.status.json({
+  try {
+    const otp = req.body.otpStr;
+    if (otp != req.session.otp) {
+      return res.status(500).json({
         success: false,
-        message: "Error occurred while signing in please try again later",
+        message: "Wrong otp",
       });
     }
-  } else {
-    console.log(req.session.otp);
-    return res.status(500).json({
-      successs: false,
-      message: "Invalid otp ",
+    const {name,email,password:pass} = req.session.userDetails;
+    const password = await bcrypt.hash(pass, 12);
+    const details = new database({ name, email, password });
+    req.session.isLoggedIn = true;
+    await req.session.save();
+    await details.save();
+    return res.status(200).json({
+      success: true,
+      message: "Logged in successfully",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(201).json({
+      success: false,
+      message: "Error occurred while signing in please try again later",
     });
   }
 };
+
+
+
+//logout
+
+exports.logout = (req,res,next)=>{
+  if(req.session.isLoggedIn){
+    req.session.isLoggedIn = false;
+  }
+}

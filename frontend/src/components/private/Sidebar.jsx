@@ -1,12 +1,21 @@
+//external modules
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
+//react icons
 import { CiChat2 } from "react-icons/ci";
 import { MdOutlineGroup } from "react-icons/md";
 import { IoNotificationsOutline, IoSettingsOutline } from "react-icons/io5";
 import { GoDotFill } from "react-icons/go";
-import { IoIosArrowBack,IoIosArrowForward } from "react-icons/io";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+import { MdLogout } from "react-icons/md";
+
+//react files
+import MainLoader from "../common/MainLoader";
+import PopNotification from "../common/PopNotification";
 
 const Sidebar = ({ setAdjust }) => {
+  const navigate = useNavigate();
   const list = [
     { icon: CiChat2, name: "Chats" },
     { icon: MdOutlineGroup, name: "Groups" },
@@ -16,6 +25,36 @@ const Sidebar = ({ setAdjust }) => {
   ];
   const [open, setOpen] = useState(true);
   const [tab, setTab] = useState("Chats");
+  const [loader, setLoader] = useState(false);
+  const [notify, setNotify] = useState("");
+
+  //logout
+
+  const logout = async () => {
+    console.log("logout is clicked");
+    try {
+      setLoader(true);
+      const response = await fetch(`${import.meta.env.VITE_LINK}/auth/logout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+      console.log("wait ...")
+      const result = await response.json();
+      console.log(result);
+      if (result.success) {
+        sessionStorage.removeItem("user");
+        navigate("../auth/login");
+      } else {
+        setNotify("Logout is unsuccessfull please try again !");
+      }
+    } catch (err) {
+      setNotify("Server error occurred please try again !");
+    } finally {
+      setLoader(false);
+    }
+  };
+
   return (
     <>
       {open && (
@@ -36,20 +75,31 @@ const Sidebar = ({ setAdjust }) => {
               </button>
             </div>
             <button className="bg-[#5d31ef] h-10 w-full flex justify-center items-center rounded-lg">
-              <span className="text-xl px-1 text-center mb-1 font-bold">+</span><p className="font-bold" >New Chat</p>
+              <span className="text-xl px-1 text-center mb-1 font-bold">+</span>
+              <p className="font-bold">New Chat</p>
             </button>
-            {list.map((tabs) => {
-              const Icons = tabs.icon;
+            {list.map(({ icon: Icon, name }) => {
               return (
                 <div
-                  key={tabs.name}
-                  className="rounded-lg  w-full h-12 flex justify-start px-2 items-center transform duration-300 cursor-pointer hover:bg-[#1b073b]"
+                  onClick={() => {
+                    setTab(name);
+                  }}
+                  key={name}
+                  className={`rounded-lg 
+                  ${tab === name ? "bg-[#5d31ef]" : "hover:bg-[#120428]"}  w-full h-12 flex justify-start px-2 items-center transform duration-300 cursor-pointer`}
                 >
-                  <Icons className="mr-1" />
-                  <p>{tabs.name}</p>
+                  <Icon className="mr-1" />
+                  <p>{name}</p>
                 </div>
               );
             })}
+            <button
+              onClick={logout}
+              className="hover:bg-[#1d0303] text-red-300 rounded-lg w-full h-12 flex justify-start px-2 items-center transform duration-300 cursor-pointer"
+            >
+              <MdLogout className="mr-1" />
+              <p>Logout</p>
+            </button>
           </div>
           <div className="h-[10%] w-full flex flex-col px-4 border-r border-t  py-4 border-gray-800">
             <p>Hamsaraj V C</p>
@@ -69,21 +119,24 @@ const Sidebar = ({ setAdjust }) => {
             <div className=" mt-8 group-hover:hidden h-15">
               <img src="/logo.png" className="w-12 h-12 object-contain" />
             </div>
-            <button className="hidden w-full h-15 mt-8 justify-center items-center cursor-pointer group-hover:flex " 
-            onClick={()=>{
-              setOpen(true);
-              setAdjust(false)}
-              } >
-              <IoIosArrowForward size={20} /></button>
-            <button className="bg-[#5d31ef] mb-2 h-8 text-center w-8 rounded-lg text-xl font-bold">
-              + 
+            <button
+              className="hidden w-full h-15 mt-8 justify-center items-center cursor-pointer group-hover:flex "
+              onClick={() => {
+                setOpen(true);
+                setAdjust(false);
+              }}
+            >
+              <IoIosArrowForward size={20} />
+            </button>
+            <button className="bg-[#5d31ef] mb-2 h-8 px-1 py-1 text-center w-8 rounded-lg text-xl font-bold">
+              +
             </button>
             {list.map(({ icon: Icon, name }) => (
               <button
                 key={name}
                 onClick={() => setTab(name)}
                 className={`
-                  ${tab === name ? "bg-[#5d31ef]" : "hover:bg-[#220453]"}
+                  ${tab === name ? "bg-[#5d31ef]" : "hover:bg-[#120428"}
                   w-12 h-12
                   rounded-2xl
                   flex items-center justify-center
@@ -97,6 +150,8 @@ const Sidebar = ({ setAdjust }) => {
               </button>
             ))}
           </div>
+          {notify.length != 0 && <PopNotification notify={notify} />}
+          {loader && <MainLoader />}
         </>
       )}
     </>

@@ -38,17 +38,15 @@ const VerifyOTP = () => {
       return;
     }
     try{
-      console.log("sending ...")
       const response = await fetch(`${import.meta.env.VITE_LINK}/auth/otp`,{
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({otpStr}),
         credentials:"include"
       })
-      console.log("waiting")
       const result = await response.json();
       console.log(result);
-      if(result.successs){
+      if(result.success){
         navigate("../../chat");
       }else{
         setErr(result.message);
