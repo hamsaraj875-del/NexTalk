@@ -209,6 +209,14 @@ exports.otp = async (req, res, next) => {
     const {name,email,password:pass} = req.session.userDetails;
     const password = await bcrypt.hash(pass, 12);
     const details = new database({ name, email, password });
+    req.session.destroy((err)=>{
+      if(err){
+        return res.status(500).json({
+          success:false,
+          message:"Internal server error occured please try again !"
+        })
+      }
+    })
     req.session.isLoggedIn = true;
     await req.session.save();
     await details.save();
@@ -220,7 +228,7 @@ exports.otp = async (req, res, next) => {
     console.log(err);
     return res.status(201).json({
       success: false,
-      message: "Error occurred while signing in please try again later",
+      message: "Error occurred while signing in please try again later"
     });
   }
 };
@@ -232,5 +240,13 @@ exports.otp = async (req, res, next) => {
 exports.logout = (req,res,next)=>{
   if(req.session.isLoggedIn){
     req.session.isLoggedIn = false;
+    return res.status(200).json({
+      success:true,
+      message:"Logged out successfully"
+    })
   }
+  return res.status(500).json({
+    success:false,
+    message:"Internal server error please try again !"
+  })
 }

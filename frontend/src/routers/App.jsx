@@ -11,6 +11,8 @@ import Otp from "../components/public/Otp";
 import Chat from "../components/private/Chat";
 import NotFound from "../components/common/NotFound";
 import Loader from "../components/common/Loader";
+import MainLoader from "../components/common/MainLoader"
+import Confirmation from "../components/common/Confirmation";
 import "../App.css";
 
 
@@ -32,6 +34,9 @@ const Router = createBrowserRouter([
   {
     path: "/chat",
     element: <Chat />,
+  },
+  {path:"/loader",
+    element:<Confirmation />
   },
   {
     path: "*",
