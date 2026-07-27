@@ -17,6 +17,7 @@ dotenv.config();
 const login = require("./login");
 const Port = process.env.PORT || 3000;
 const Db = process.env.DB;
+const controller = require("../controller/controller");
 
 //Session handling
 
@@ -81,6 +82,9 @@ const user = (req, res, next) => {
     });
   }
 };
+
+
+app.post("/auth/authenticate",controller.authenticate);
 
 mongoose.connect(Db).then(() => {
   console.log("Server and database are connected successfully");

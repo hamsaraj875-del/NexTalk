@@ -1,3 +1,12 @@
+//external modules
+
+
+//internal modules 
+
+
+//react icons 
+import { MdOutlineAccountCircle } from "react-icons/md"
+
 const Friends = ({setFriend}) => {
   const friendsList = [
     { name: "Riya", time: "12:30 AM", mes: "How are you ?", online: true, unread: 2 },
@@ -33,7 +42,7 @@ const Friends = ({setFriend}) => {
           >
             <div className="relative">
               <img
-                src="logo.png"
+                src="friends.png"
                 alt=""
                 className="w-12 h-12 object-cover rounded-full"
               />

@@ -61,7 +61,7 @@ exports.signUp = [
         if (user) {
           return res.status(409).json({
             success: false,
-            validationError:false,
+            validationError: false,
             message: "user already exists",
           });
         } else {
@@ -79,7 +79,7 @@ exports.signUp = [
             console.log(err);
             return res.status(500).json({
               success: false,
-              validationError:false,
+              validationError: false,
               message:
                 "Error occurred while sending the email please try again ",
             });
@@ -89,7 +89,7 @@ exports.signUp = [
         console.log(err);
         return res.status(500).json({
           success: false,
-          validationError:false,
+          validationError: false,
           message: "Internal server error",
         });
       }
@@ -114,14 +114,14 @@ exports.login = async (req, res, next) => {
     } else {
       return res.status(500).json({
         success: false,
-        validationError:false,
+        validationError: false,
         message: "Unauthorized access please sign up first",
       });
     }
   } catch (err) {
     return res.status(201).json({
       success: false,
-      validationError:false,
+      validationError: false,
       message: "Error occured try again later",
     });
   }
@@ -206,20 +206,21 @@ exports.otp = async (req, res, next) => {
         message: "Wrong otp",
       });
     }
-    const {name,email,password:pass} = req.session.userDetails;
+    const { name, email, password: pass } = req.session.userDetails;
     const password = await bcrypt.hash(pass, 12);
     const details = new database({ name, email, password });
-    req.session.destroy((err)=>{
-      if(err){
+    req.session.destroy((err) => {
+      if (err) {
         return res.status(500).json({
-          success:false,
-          message:"Internal server error occured please try again !"
-        })
+          success: false,
+          message: "Internal server error occured please try again !",
+        });
       }
-    })
-    req.session.isLoggedIn = true;
-    await req.session.save();
+    });
     await details.save();
+    req.session.isLoggedIn = true;
+    req.session.userId = details._id;
+    await req.session.save();
     return res.status(200).json({
       success: true,
       message: "Logged in successfully",
@@ -228,25 +229,23 @@ exports.otp = async (req, res, next) => {
     console.log(err);
     return res.status(201).json({
       success: false,
-      message: "Error occurred while signing in please try again later"
+      message: "Error occurred while signing in please try again later",
     });
   }
 };
 
-
-
 //logout
 
-exports.logout = (req,res,next)=>{
-  if(req.session.isLoggedIn){
+exports.logout = (req, res, next) => {
+  if (req.session.isLoggedIn) {
     req.session.isLoggedIn = false;
     return res.status(200).json({
-      success:true,
-      message:"Logged out successfully"
-    })
+      success: true,
+      message: "Logged out successfully",
+    });
   }
   return res.status(500).json({
-    success:false,
-    message:"Internal server error please try again !"
-  })
-}
+    success: false,
+    message: "Internal server error please try again !",
+  });
+};
