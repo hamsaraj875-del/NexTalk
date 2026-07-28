@@ -78,6 +78,7 @@ const user = (req, res, next) => {
   } else {
     return res.status(201).json({
       success: false,
+      unauthorised:true,
       message: "User not found please log in first!",
     });
   }
@@ -85,6 +86,8 @@ const user = (req, res, next) => {
 
 
 app.post("/auth/authenticate",controller.authenticate);
+app.post("/search",user,controller.searchUsers);
+app.post("/friends",user,controller.friends);
 
 mongoose.connect(Db).then(() => {
   console.log("Server and database are connected successfully");

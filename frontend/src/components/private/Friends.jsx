@@ -1,83 +1,81 @@
 //external modules
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
+//internal modules
+import FriendsList from "./FriendsList";
+import SearchList from "./SearchList";
 
-//internal modules 
+//react icons
+import { MdOutlineAccountCircle } from "react-icons/md";
 
+const Friends = ({ tab, setFriend }) => {
+  const [friendsList, setFriendsList] = useState([]);
+  const [search, setSearch] = useState([]);
 
-//react icons 
-import { MdOutlineAccountCircle } from "react-icons/md"
+  console.log(tab);
 
-const Friends = ({setFriend}) => {
-  const friendsList = [
-    { name: "Riya", time: "12:30 AM", mes: "How are you ?", online: true, unread: 2 },
-    { name: "Raj", time: "Yesterday", mes: "Nothing", online: false, unread: 0 },
-    { name: "Priya", time: "Today", mes: "How's everything going?", online: true, unread: 1 },
-    { name: "Ram", time: "11:01 AM", mes: "Send me the homework.", online: false, unread: 0 },
-    { name: "Anjali", time: "9:45 PM", mes: "Let's meet tomorrow!", online: true, unread: 5 },
-    { name: "Karan", time: "8:10 PM", mes: "Okay 👍", online: false, unread: 0 },
-    { name: "Priya", time: "Today", mes: "How's everything going?", online: true, unread: 1 },
-    { name: "Ram", time: "11:01 AM", mes: "Send me the homework.", online: false, unread: 0 },
-    { name: "Anjali", time: "9:45 PM", mes: "Let's meet tomorrow!", online: true, unread: 5 },
-    { name: "Karan", time: "8:10 PM", mes: "Okay 👍", online: false, unread: 0 },
-  ];
+  useEffect(() => {
+    if (tab === "Friends") {
+      const controller = new AbortController();
+      const signal = controller.signal;
+      const fetcher = async () => {
+        const response = await fetch(`${import.meta.env.VITE_LINK}/friends`, {
+          signal,
+          credentials: "include",
+          method: "POST",
+        });
+        const result = await response.json();
+        console.log(result);
+      };
+      fetcher();
+      return () => {
+        controller.abort();
+      };
+    }
+  }, []);
 
+  const searchFriends = async () => {
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_LINK}/search?name=${encodeURIComponent(search)}`,
+        {
+          method: "POST",
+          credentials: "include",
+        },
+      );
+
+      const result = await response.json();
+      setFriendsList(result.message);
+      console.log(friendsList);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   return (
-    <div className="w-full h-screen bg-black text-white border-r border-gray-900 flex flex-col">
-
-      <div className="sticky top-0 z-10 bg-black p-4 border-b border-[#221339]">
-        <input
-          type="text"
-          placeholder="Search friends..."
-          className="w-full border border-gray-700 bg-[#080017] rounded-xl px-4 py-3 outline-none text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500"
-        />
+    <>
+      <div className="w-full h-screen bg-black text-white border-r border-gray-900 flex flex-col">
+        <div className="sticky top-0 z-10 bg-black p-4 border-b border-[#221339]">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+            }}
+            onKeyDown={(e) => {
+              if (e.key == "Enter") {
+                searchFriends();
+              }
+            }}
+            placeholder="Search friends..."
+            className="w-full border border-gray-700 bg-[#080017] rounded-xl px-4 py-3 outline-none text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        {tab==="Friends" && <FriendsList friendsList={friendsList} />}
+        {tab==="Chats" && <SearchList friendsList={friendsList} />}
       </div>
-
-      <div className="flex-1 overflow-y-auto scrollbar-none p-3 space-y-2">
-
-        {friendsList.map((person, index) => (
-          <div
-            key={index}
-            onClick={()=>setFriend(person.name)}
-            className="group flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition-all duration-300 hover:bg-[#120430]"
-          >
-            <div className="relative">
-              <img
-                src="friends.png"
-                alt=""
-                className="w-12 h-12 object-cover rounded-full"
-              />
-
-              {person.online && (
-                <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-[#0F071C] " />
-              )}
-            </div>
-
-            <div className="flex-1 overflow-hidden">
-              <div className="flex justify-between items-center">
-                <h2 className="font-semibold text-white ">
-                  {person.name}
-                </h2>
-
-                <span className="text-xs text-gray-500">
-                  {person.time}
-                </span>
-              </div>
-
-              <p className="text-sm text-gray-500 truncate">
-                {person.mes}
-              </p>
-            </div>
-            {person.unread > 0 && (
-              <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-xs font-semibold">
-                {person.unread}
-              </div>
-            )}
-          </div>
-        ))}
-
-      </div>
-
-    </div>
+    </>
   );
 };
 

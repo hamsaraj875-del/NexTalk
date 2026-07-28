@@ -52,6 +52,7 @@ exports.signUp = [
       return res.status(400).json({
         success: false,
         message: formattedError,
+        validationError:true,
       });
     }
     if (errors.isEmpty()) {
@@ -209,15 +210,10 @@ exports.otp = async (req, res, next) => {
     const { name, email, password: pass } = req.session.userDetails;
     const password = await bcrypt.hash(pass, 12);
     const details = new database({ name, email, password });
-    req.session.destroy((err) => {
-      if (err) {
-        return res.status(500).json({
-          success: false,
-          message: "Internal server error occured please try again !",
-        });
-      }
-    });
     await details.save();
+    delete req.session.otp;
+    delete req.session.userDetails;
+    req.session.userName = name;
     req.session.isLoggedIn = true;
     req.session.userId = details._id;
     await req.session.save();

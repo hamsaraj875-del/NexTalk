@@ -14,6 +14,7 @@ const Chat = () => {
   const [adjust, setAdjust] = useState(false);
   const [notify, setNotify] = useState("");
   const [loader, setLoader] = useState(false);
+  const [tab, selectTab] = useState("Chats");
   const showNotification = () => {
     setTimeout(() => {
       setNotify("");
@@ -33,9 +34,10 @@ const Chat = () => {
               setAdjust={setAdjust}
               setNotify={setNotify}
               setLoader={setLoader}
+              selectTab={selectTab}
             />
           </div>
-          <ChatContent className={`h-full `} />
+          <ChatContent tab={tab} className={`h-full `} />
         </div>
         <PopNotification notify={notify} />
         {loader && <MainLoader />}

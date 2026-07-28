@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
 
-const friends = createSchema({
+const friends = new mongoose.Schema({
   user1:{type:mongoose.Schema.Types.ObjectId,ref:"database",required:true},
   user2:{type:mongoose.Schema.Types.ObjectId,ref:"database",required:true},
-  status:{type:String,required:true,default:"pending"},
+  status:{type:String,required:true,default:"none"},
 });
 
-module.export = mongoose.model("friends",friends);
+module.exports = mongoose.model("friends",friends);

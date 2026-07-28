@@ -13,11 +13,10 @@ import { MdLogout } from "react-icons/md";
 //react files
 import Confirmation from "../common/Confirmation";
 
-const Sidebar = ({ setAdjust, setLoader, setNotify }) => {
+const Sidebar = ({ selectTab, setAdjust, setLoader, setNotify }) => {
   const navigate = useNavigate();
   const list = [
     { icon: CiChat2, name: "Chats" },
-    { icon: MdOutlineGroup, name: "Groups" },
     { icon: MdOutlineGroup, name: "Friends" },
     { icon: IoNotificationsOutline, name: "Notifications" },
     { icon: IoSettingsOutline, name: "Settings" },
@@ -32,7 +31,7 @@ const Sidebar = ({ setAdjust, setLoader, setNotify }) => {
     setConfirm(true);
   };
 
-  const logout = async ( confirmation ) => {
+  const logout = async (confirmation) => {
     setConfirm(false);
     if (confirmation) {
       try {
@@ -94,6 +93,7 @@ const Sidebar = ({ setAdjust, setLoader, setNotify }) => {
                 <div
                   onClick={() => {
                     setTab(name);
+                    selectTab(name);
                   }}
                   key={name}
                   className={`rounded-lg 
@@ -145,7 +145,10 @@ const Sidebar = ({ setAdjust, setLoader, setNotify }) => {
             {list.map(({ icon: Icon, name }) => (
               <button
                 key={name}
-                onClick={() => setTab(name)}
+                onClick={() => {
+                  setTab(name);
+                  selectTab(name);
+                }}
                 className={`
                   ${tab === name ? "bg-[#5d31ef]" : "hover:bg-[#120428"}
                   w-12 h-12

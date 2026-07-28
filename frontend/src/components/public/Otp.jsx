@@ -5,10 +5,12 @@ import {useNavigate} from "react-router-dom";
 
 //files modules
 import ErrorMessage from "../common/ErrorMessage";
+import MainLoader from "../common/MainLoader";
 
 const VerifyOTP = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [err ,setErr] = useState("");
+  const [loader,setLoader] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (value, index) => {
@@ -30,6 +32,7 @@ const VerifyOTP = () => {
   };
 
   const handleSubmit = async(e) => {
+    setLoader(true);
     e.preventDefault();
     console.log(otp);
     const otpStr = otp.join("");
@@ -55,10 +58,13 @@ const VerifyOTP = () => {
     catch(err){
       console.log(err);
       setErr("Server error please try again");
+    }finally{
+      setLoader(false);
     }
   };
 
   return (
+    <>
     <div className="min-h-screen bg-[#0c021a] flex items-center justify-center px-5">
       <div className="w-full max-w-md bg-zinc-900 rounded-3xl shadow-xl p-8">
 
@@ -114,6 +120,8 @@ const VerifyOTP = () => {
 
       </div>
     </div>
+    {loader && <MainLoader />}
+    </>
   );
 };
 
