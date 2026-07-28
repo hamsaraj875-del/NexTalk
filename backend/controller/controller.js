@@ -29,7 +29,7 @@ exports.friends = async (req, res, next) => {
       success: true,
       message: friendsList,
     });
-  } catch(err) {
+  } catch (err) {
     console.log(err);
     return res.status(500).json({
       success: false,
@@ -40,7 +40,7 @@ exports.friends = async (req, res, next) => {
 
 exports.searchUsers = async (req, res, next) => {
   try {
-    const {name} = req.query;
+    const { name } = req.query;
     const list = await database
       .find({ name: { $regex: name, $options: "i" } })
       .select("name _id");
@@ -61,14 +61,43 @@ exports.searchUsers = async (req, res, next) => {
       }),
     );
     return res.status(200).json({
-      success:true,
-      message:result,
-    })
-  } catch(err) {
+      success: true,
+      message: result,
+    });
+  } catch (err) {
     console.log(err);
     return res.status(201).json({
       success: false,
       message: "Search not found!",
+    });
+  }
+};
+
+//invitation from the user
+exports.invite = async (req, res, next) => {
+  const { userId:user2, userName:name } = req.body;
+  try {
+    const user1 = req.session.userId;
+    const data = await friends.find({user1:user1,user2:user2});
+    if(data){
+      return res.json({
+        success:false,
+        message:"Invitation is already sent please wait util the user accept !"
+      })
+    }
+    const status = "pending";
+    const details = new friends({ user1, user2, status });
+    await details.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Invitation sent to the" + name,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      success: false,
+      message: "Server error occured please try again !",
     });
   }
 };

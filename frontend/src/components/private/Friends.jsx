@@ -13,7 +13,6 @@ const Friends = ({ tab, setFriend }) => {
   const [friendsList, setFriendsList] = useState([]);
   const [search, setSearch] = useState([]);
 
-  console.log(tab);
 
   useEffect(() => {
     if (tab === "Friends") {

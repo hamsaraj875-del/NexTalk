@@ -88,6 +88,7 @@ const user = (req, res, next) => {
 app.post("/auth/authenticate",controller.authenticate);
 app.post("/search",user,controller.searchUsers);
 app.post("/friends",user,controller.friends);
+app.post("/invite",user,controller.invite);
 
 mongoose.connect(Db).then(() => {
   console.log("Server and database are connected successfully");
