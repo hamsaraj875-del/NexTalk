@@ -1,5 +1,5 @@
 //external modules
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 //react icons
@@ -24,6 +24,7 @@ const Sidebar = ({ selectTab, setAdjust, setLoader, setNotify }) => {
   const [open, setOpen] = useState(true);
   const [tab, setTab] = useState("Chats");
   const [confirm, setConfirm] = useState(false);
+  const [userData, setUserData] = useState("");
 
   //logout
 
@@ -45,6 +46,7 @@ const Sidebar = ({ selectTab, setAdjust, setLoader, setNotify }) => {
           },
         );
         const result = await response.json();
+        console.log(result);
         if (result.success) {
           sessionStorage.removeItem("user");
           navigate("/auth/login");
@@ -58,6 +60,31 @@ const Sidebar = ({ selectTab, setAdjust, setLoader, setNotify }) => {
       }
     }
   };
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    const fetcher = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_LINK}/userDetails`,{
+          signal,
+          method:"POST",
+          credentials:"include",
+        });
+        const result = await response.json();
+        console.log(result);
+        if (result.success) {
+          setUserData(result.message);
+        }
+      } catch (err) {
+        console.log(err);
+        setUserData("not found!");
+      }
+    };
+    fetcher();
+    return()=>{
+      controller.abort();
+    }
+  },[]);
 
   return (
     <>
@@ -113,7 +140,7 @@ const Sidebar = ({ selectTab, setAdjust, setLoader, setNotify }) => {
             </button>
           </div>
           <div className="h-[10%] w-full flex flex-col px-4 border-r border-t  py-4 border-gray-800">
-            <p>Hamsaraj V C</p>
+            <p>{userData}</p>
             <div className="flex justify-start items-center">
               <GoDotFill
                 size={15}

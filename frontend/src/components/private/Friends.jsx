@@ -11,31 +11,69 @@ import { MdOutlineAccountCircle } from "react-icons/md";
 
 const Friends = ({ tab, setFriend }) => {
   const [friendsList, setFriendsList] = useState([]);
+  const [notification, setNotification] = useState([]);
   const [search, setSearch] = useState([]);
-
-
+  const [loader, setLoader] = useState([]);
+  
   useEffect(() => {
     if (tab === "Friends") {
       const controller = new AbortController();
       const signal = controller.signal;
-      const fetcher = async () => {
-        const response = await fetch(`${import.meta.env.VITE_LINK}/friends`, {
-          signal,
-          credentials: "include",
-          method: "POST",
-        });
-        const result = await response.json();
-        console.log(result);
+      setLoader(true);
+      try {
+        const fetcher = async () => {
+          const response = await fetch(`${import.meta.env.VITE_LINK}/friends`, {
+            signal,
+            credentials: "include",
+            method: "POST",
+          });
+          const result = await response.json();
+          console.log(result);
+          if (result.success) {
+            setFriendsList(result.message);
+          }
+        };
+      } catch (err) {
+        console.log(err);
+      }finally{
+        setLoader(false);
+      }
+      fetcher();
+      return () => {
+        controller.abort();
       };
+    } else if (tab === "Notifications") {
+      const controller = new AbortController();
+      const signal = controller.signal;
+      setLoader(true);
+      try {
+        const fetcher = async () => {
+          const response = await fetch(
+            `${import.meta.env.VITE_LINK}/notifications`,
+            {
+              signal,
+              credentials: "include",
+              method: "POST",
+            },
+          );
+          const result = await response.json();
+          setNotification(result.message);
+          if (result.success) {
+            setFriendsList(result.message);
+          }
+        };
+      } catch (err) {
+        console.log(err);
+        set;
+      }
       fetcher();
       return () => {
         controller.abort();
       };
     }
-  }, []);
+  }, [tab]);
 
   const searchFriends = async () => {
-
     try {
       const response = await fetch(
         `${import.meta.env.VITE_LINK}/search?name=${encodeURIComponent(search)}`,
@@ -46,6 +84,7 @@ const Friends = ({ tab, setFriend }) => {
       );
 
       const result = await response.json();
+      console.log(result.message);
       setFriendsList(result.message);
       console.log(friendsList);
     } catch (error) {
@@ -71,8 +110,8 @@ const Friends = ({ tab, setFriend }) => {
             className="w-full border border-gray-700 bg-[#080017] rounded-xl px-4 py-3 outline-none text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500"
           />
         </div>
-        {tab==="Friends" && <FriendsList friendsList={friendsList} />}
-        {tab==="Chats" && <SearchList friendsList={friendsList} />}
+        {tab === "Friends" && <FriendsList friendsList={friendsList} />}
+        {tab === "Chats" && <SearchList friendsList={friendsList} />}
       </div>
     </>
   );

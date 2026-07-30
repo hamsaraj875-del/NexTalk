@@ -89,6 +89,8 @@ app.post("/auth/authenticate",controller.authenticate);
 app.post("/search",user,controller.searchUsers);
 app.post("/friends",user,controller.friends);
 app.post("/invite",user,controller.invite);
+app.post("/notifications",user,controller.notification);
+app.post("/userDetails",user,controller.hostDetails);
 
 mongoose.connect(Db).then(() => {
   console.log("Server and database are connected successfully");

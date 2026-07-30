@@ -107,6 +107,8 @@ exports.login = async (req, res, next) => {
     const user = await database.findOne({ email: email });
     if (user && (await bcrypt.compare(password, user.password))) {
       req.session.isLoggedIn = true;
+      req.session.userName= user.name;
+      req.session.userId = user._id;
       await req.session.save();
       return res.status(200).json({
         success: true,
