@@ -5,13 +5,15 @@ import { useNavigate } from "react-router-dom";
 //internal modules
 import FriendsList from "./FriendsList";
 import SearchList from "./SearchList";
+import NotificationList from "./NotificationList";
 
 //react icons
 import { MdOutlineAccountCircle } from "react-icons/md";
 
 const Friends = ({ tab, setFriend }) => {
   const [friendsList, setFriendsList] = useState([]);
-  const [notification, setNotification] = useState([]);
+  const [notificationList, setNotificationList] = useState([]);
+  const [searchList,setSearchList] = useState([]);
   const [search, setSearch] = useState([]);
   const [loader, setLoader] = useState([]);
   
@@ -28,7 +30,6 @@ const Friends = ({ tab, setFriend }) => {
             method: "POST",
           });
           const result = await response.json();
-          console.log(result);
           if (result.success) {
             setFriendsList(result.message);
           }
@@ -57,16 +58,16 @@ const Friends = ({ tab, setFriend }) => {
             },
           );
           const result = await response.json();
-          setNotification(result.message);
+          console.log(result);
+          setNotificationList(result.message);
           if (result.success) {
             setFriendsList(result.message);
           }
         };
+      fetcher();
       } catch (err) {
         console.log(err);
-        set;
       }
-      fetcher();
       return () => {
         controller.abort();
       };
@@ -84,9 +85,7 @@ const Friends = ({ tab, setFriend }) => {
       );
 
       const result = await response.json();
-      console.log(result.message);
-      setFriendsList(result.message);
-      console.log(friendsList);
+      setSearchList(result.message);
     } catch (error) {
       console.error(error);
     }
@@ -110,8 +109,9 @@ const Friends = ({ tab, setFriend }) => {
             className="w-full border border-gray-700 bg-[#080017] rounded-xl px-4 py-3 outline-none text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500"
           />
         </div>
-        {tab === "Friends" && <FriendsList friendsList={friendsList} />}
-        {tab === "Chats" && <SearchList friendsList={friendsList} />}
+        {tab === "Friends" && <FriendsList friendsList={friendsList,setFriendsList} />}
+        {tab === "Chats" && <SearchList searchList={searchList} setSearchList={setSearchList} />}
+        {tab === "Notifications" && <NotificationList setNotificationList={setNotificationList} notificationList ={notificationList} />}
       </div>
     </>
   );

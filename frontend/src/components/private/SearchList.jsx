@@ -4,7 +4,7 @@ import { useState } from "react";
 //internal files
 import PopNotification from "../common/PopNotification";
 
-const SearchList = ({ friendsList }) => {
+const SearchList = ({ searchList,setSearchList }) => {
   const [err, setErr] = useState("");
   const sendInvitation = async (userId, userName) => {
     try {
@@ -16,10 +16,10 @@ const SearchList = ({ friendsList }) => {
       });
       const result = await response.json();
       if(result.success){
-        setFriendsList((prev) =>
+        setSearchList((prev) =>
           prev.map((user) =>
             user.userId === userId
-              ? { ...user, userStatus: "pending" }
+              ? { ...user, userStatus: "Request Sent" }
               : user
           )
         );
@@ -34,8 +34,8 @@ const SearchList = ({ friendsList }) => {
   return (
     <>
       <div className="flex-1 overflow-y-auto scrollbar-none p-3 space-y-2">
-    {friendsList.length!=0?(
-        friendsList.map(({ userId, userName, userStatus }) => (
+    {searchList.length!=0?(
+        searchList.map(({ userId, userName, userStatus }) => (
           <div
             key={userId}
             className="w-full transition-all duration-300 bg-gray-800 h-12 rounded-xl flex items-center justify-evenly"
@@ -44,11 +44,11 @@ const SearchList = ({ friendsList }) => {
             <button
               onClick={() => {
                 sendInvitation(userId, userName);
-                userStatus = "pending";
               }}
-              className="cursor-pointer bg-green-400 text-black px-2 py-1 rounded-lg"
+              disabled={userStatus==="pending" || userStatus === "accepted"}
+              className=" disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer bg-green-400 text-black px-2 py-1 rounded-lg "
             >
-              {userStatus === "none" ? "send request" : userStatus}
+              {userStatus === "none" ? "Invite" : userStatus === "pending"?"Request Sent":userStatus}
             </button>
           </div>
         ))):(

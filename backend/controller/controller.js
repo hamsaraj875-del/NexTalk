@@ -48,26 +48,24 @@ exports.friends = async (req, res, next) => {
 exports.searchUsers = async (req, res, next) => {
   try {
     const { name } = req.query;
-    const list = await database
+    const l = await database
       .find({ name: { $regex: name, $options: "i" } })
       .select("name _id");
 
-    list.filter((user) => user._id.toString() != req.session.userId);
+    const list = l.filter((user) => user._id.toString() != req.session.userId);
     const result = await Promise.all(
       list.map(async (user) => {
-        if (user._id.toString() !== req.session.userId) {
-          const friend = await friends.findOne({
-            $or: [
-              { user1: req.session.userId, user2: user._id },
-              { user1: user._id, user2: req.session.userId },
-            ],
-          });
-          return {
-            userId: user._id,
-            userName: user.name,
-            userStatus: friend?.status || "none",
-          };
-        }
+        const friend = await friends.findOne({
+          $or: [
+            { user1: req.session.userId, user2: user._id },
+            { user1: user._id, user2: req.session.userId },
+          ],
+        });
+        return {
+          userId: user._id,
+          userName: user.name,
+          userStatus: friend?.status || "none",
+        };
       }),
     );
     return res.status(200).json({
@@ -117,16 +115,16 @@ exports.invite = async (req, res, next) => {
 
 //Invitation acceptation
 exports.accept = async (req, res, next) => {
-  const user = req.query;
+  const {id,name} = req.body;
   try {
-    const result = await friends.findAndUpdate(
-      { user1: user, user2: req.session.userId, status: "Pending" },
+    const result = await friends.findOneAndUpdate(
+      { user1: id, user2: req.session.userId, status: "pending" },
       { $set: { status: "accepted" } },
     );
     if (result) {
       return res.status(200).json({
         success: true,
-        message: "accepted the result",
+        message: "Now "+name+" is your friend",
       });
     } else {
       return res.status(500).json({
@@ -147,22 +145,19 @@ exports.accept = async (req, res, next) => {
 
 exports.notification = async (req, res, next) => {
   try {
-    const notify = await friends.find({
+    const not = await friends.find({
       user2: req.session.userId,
       status: "pending",
     });
-    console.log(notify);
+    notify = not.filter((user) => user.user1.toString() !== req.session.userId);
     const result = await Promise.all(
       notify.map(async (user) => {
-        if (user.user1 !== req.session.userId) {
-          const request = await database
-            .findById(user.user1)
-            .select("name _id");
-          return {
-            name: request.name,
-            id: request._id,
-          };
-        }
+        const request = await database.findById(user.user1).select("name _id");
+        return {
+          name: request.name,
+          id: request._id,
+          status: "pending",
+        };
       }),
     );
     return res.status(200).json({

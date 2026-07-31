@@ -89,6 +89,7 @@ app.post("/auth/authenticate",controller.authenticate);
 app.post("/search",user,controller.searchUsers);
 app.post("/friends",user,controller.friends);
 app.post("/invite",user,controller.invite);
+app.post("/accept",user,controller.accept);
 app.post("/notifications",user,controller.notification);
 app.post("/userDetails",user,controller.hostDetails);
 

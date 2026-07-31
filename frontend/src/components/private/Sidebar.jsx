@@ -71,7 +71,6 @@ const Sidebar = ({ selectTab, setAdjust, setLoader, setNotify }) => {
           credentials:"include",
         });
         const result = await response.json();
-        console.log(result);
         if (result.success) {
           setUserData(result.message);
         }
