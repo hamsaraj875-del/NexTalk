@@ -10,6 +10,7 @@ exports.authenticate = (req, res, next) => {
   if (req.session.isLoggedIn) {
     return res.status(200).json({
       success: true,
+      userId:req.session.userId,
       message: "The user is logged in",
     });
   } else {
@@ -26,13 +27,27 @@ exports.friends = async (req, res, next) => {
   try {
     const friendsList = await friends.find({
       $or: [
-        { user1: req.session.userId, status: "Accepted" },
-        { user2: req.session.userId, staus: "Accepted " },
+        { user1: req.session.userId, status: "accepted" },
+        { user2: req.session.userId, status: "accepted" },
       ],
-    });
+    }).populate("user1","name").populate("user2","name");
+
+    const result = friendsList.map(user=>{
+      let name;
+      let id
+      if(user.user1._id.toString()===req.session.userId){
+        name = user.user2.name;
+        id = user.user2._id;
+      }else{
+        name = user.user1.name;
+        id = user.user1._id;
+      }
+      return {name,id};
+    })
+
     return res.status(200).json({
       success: true,
-      message: friendsList,
+      message: result,
     });
   } catch (err) {
     console.log(err);

@@ -1,5 +1,6 @@
 //external modules
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 //internal modules
 import Friends from "./Friends";
@@ -9,12 +10,52 @@ import ChatContent from "../private/ChatContent";
 import Otp from "../public/Otp";
 import MainLoader from "../common/MainLoader";
 import PopNotification from "../common/PopNotification";
+import socket from "../private/socket";
 
 const Chat = () => {
+  const navigate = useNavigate();
   const [adjust, setAdjust] = useState(false);
   const [notify, setNotify] = useState("");
   const [loader, setLoader] = useState(false);
   const [tab, selectTab] = useState("Chats");
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    const fetcher = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_LINK}/auth/authenticate`,
+          {
+            signal,
+            method: "POST",
+            credentials: "include",
+          },
+        );
+        const result = await response.json();
+        if (!result.success) {
+          navigate("../auth/login");
+          return;
+        }
+        socket.connect();
+        socket.once("connect",()=>{
+          socket.emit("register",result.userId);
+        })
+      } catch (err) {
+        console.log(err);
+        if (err.name != "AbortError") {
+          navigate("../auth/login");
+        }
+      }
+    };
+    fetcher();
+    return()=>{
+      controller.abort();
+      socket.disconnect();
+    }
+  },[]);
+
   return (
     <>
       <div className="h-screen w-screen bg-[#0c021a] text-white">

@@ -9,7 +9,7 @@ const ChatContent = ({tab})=>{
     <>
     <div className="flex w-full h-full">
       <div className="w-[30%] h-full">
-        <Friends tab={tab} setFriend={setFriend} />
+        <Friends tab={tab} setFriend={setFriend} friend={friend} />
       </div>
       <div className="w-[70%] h-full">
         <Messages friend={friend} setFriend={setFriend} />

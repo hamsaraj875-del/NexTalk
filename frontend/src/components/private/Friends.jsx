@@ -10,7 +10,7 @@ import NotificationList from "./NotificationList";
 //react icons
 import { MdOutlineAccountCircle } from "react-icons/md";
 
-const Friends = ({ tab, setFriend }) => {
+const Friends = ({ tab, setFriend,friend }) => {
   const [friendsList, setFriendsList] = useState([]);
   const [notificationList, setNotificationList] = useState([]);
   const [searchList,setSearchList] = useState([]);
@@ -34,12 +34,12 @@ const Friends = ({ tab, setFriend }) => {
             setFriendsList(result.message);
           }
         };
+      fetcher();
       } catch (err) {
         console.log(err);
       }finally{
         setLoader(false);
       }
-      fetcher();
       return () => {
         controller.abort();
       };
@@ -77,7 +77,7 @@ const Friends = ({ tab, setFriend }) => {
   const searchFriends = async () => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_LINK}/search?name=${encodeURIComponent(search)}`,
+        `${import.meta.env.VITE_LINK}/search?name=${encodeURIComponent(search.trim())}`,
         {
           method: "POST",
           credentials: "include",
@@ -109,7 +109,7 @@ const Friends = ({ tab, setFriend }) => {
             className="w-full border border-gray-700 bg-[#080017] rounded-xl px-4 py-3 outline-none text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500"
           />
         </div>
-        {tab === "Friends" && <FriendsList friendsList={friendsList,setFriendsList} />}
+        {tab === "Friends" && <FriendsList friend={friend} friendsList={friendsList} setFriend={setFriend} setFriendsList={setFriendsList} />}
         {tab === "Chats" && <SearchList searchList={searchList} setSearchList={setSearchList} />}
         {tab === "Notifications" && <NotificationList setNotificationList={setNotificationList} notificationList ={notificationList} />}
       </div>

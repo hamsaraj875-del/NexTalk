@@ -3,23 +3,21 @@ import { useState } from "react";
 
 const NotificationList = ({ setNotificationList, notificationList, err }) => {
   const [notify, setNotify] = useState("");
-  const acceptInvitation = async (id,name) => {
+  const acceptInvitation = async (id, name) => {
     try {
       const response = await fetch(`${import.meta.env.VITE_LINK}/accept`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body:JSON.stringify(
-          { id, name }
-        )
+        body: JSON.stringify({ id, name }),
       });
       const result = await response.json();
       console.log(result);
       if (result.success) {
-        setNotificationList((prev) => 
+        setNotificationList((prev) =>
           prev.map((user) =>
             user.id === id ? { ...user, status: "accepted" } : user,
-          )
+          ),
         );
       }
       setNotify(result.message);
@@ -48,7 +46,9 @@ const NotificationList = ({ setNotificationList, notificationList, err }) => {
             </div>
           ))
         ) : (
-          <div className="text-gray-600">Search for the users</div>
+          <div className="w-full h-full flex flex-col items-center justify-start text-center text-gray-500">
+            <p className="h-fit w-fit mt-24">No notification yet !</p>
+          </div>
         )}
       </div>
     </>

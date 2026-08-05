@@ -8,7 +8,6 @@ const session = require("express-session");
 const { MongoStore } = require("connect-mongo");
 const cors = require("cors");
 const http = require("http");
-const { Server } = require("socket.io");
 const server = http.createServer(app);
 dotenv.config();
 
@@ -18,6 +17,7 @@ const login = require("./login");
 const Port = process.env.PORT || 3000;
 const Db = process.env.DB;
 const controller = require("../controller/controller");
+const socket = require("../utils/socket");
 
 //Session handling
 
@@ -25,21 +25,6 @@ const store = MongoStore.create({
   mongoUrl: process.env.DB,
   collectionName: "sessions",
   ttl: 60 * 60 * 24 * 5,
-});
-
-const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:5173",
-    credentials: true,
-  },
-});
-
-io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
-
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
-  });
 });
 
 
@@ -92,6 +77,8 @@ app.post("/invite",user,controller.invite);
 app.post("/accept",user,controller.accept);
 app.post("/notifications",user,controller.notification);
 app.post("/userDetails",user,controller.hostDetails);
+
+socket(server);
 
 mongoose.connect(Db).then(() => {
   console.log("Server and database are connected successfully");
