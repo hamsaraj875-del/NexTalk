@@ -3,7 +3,7 @@ import {useState} from "react"
 import Friends from "./Friends";
 import Messages from "./Messages";
 
-const ChatContent = ({tab})=>{
+const ChatContent = ({tab,userDetails})=>{
   const [friend,setFriend] = useState(null);
   return(
     <>
@@ -12,7 +12,7 @@ const ChatContent = ({tab})=>{
         <Friends tab={tab} setFriend={setFriend} friend={friend} />
       </div>
       <div className="w-[70%] h-full">
-        <Messages friend={friend} setFriend={setFriend} />
+        <Messages userDetails={userDetails} friend={friend} setFriend={setFriend} />
       </div>
     </div>
     </>

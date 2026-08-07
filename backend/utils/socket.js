@@ -28,22 +28,42 @@ server = async (server) => {
     socket.on("message", async (data) => {
       const recieverSocketId = onlineUser.get(data.recieverId);
       const senderId = onlineSocket.get(socket.id);
+      const recieverId = data.recieverId;
+      const message = data.message;
+
       const connection = await friends.findOne({
         $or: [
-          { user1: senderId, user2: data.recieverId },
-          { user1: data.recieverId, user2: senderId },
+          { user1: senderId, user2: recieverId },
+          { user1: recieverId, user2: senderId },
         ],
       });
-      if (connection) {
+      if (connection && connection.status==="accepted") {
         const time = new Date().toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
           hour12: true,
         });
-        io.to(recieverSocketId).emit("message", data.message, time);
-        console.log(data.message + " is the message sent to the friend");
+        if (recieverSocketId) {
+          io.to(recieverSocketId).emit("message",recieverId,senderId, message, time);
+          const details = new messages({
+            senderId,
+            recieverId,
+            message,
+            time,
+            status: "sent",
+          });
+          await details.save();
+        } else {
+          const details = new messages({
+            senderId,
+            recieverId,
+            message,
+            time,
+            status: "pending",
+          });
+          await details.save();
+        }
       }
-      const recieverId = data.recieverId;
     });
 
     console.log("online users are ", onlineUser);

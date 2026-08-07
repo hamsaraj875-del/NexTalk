@@ -7,24 +7,25 @@ import { BsFillSendFill } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa6";
 import { IoArrowBackOutline } from "react-icons/io5";
 
-const Messages = ({ friend, setFriend }) => {
+const Messages = ({ userDetails,friend, setFriend }) => {
   const [message, setMessage] = useState("");
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    socket.on("message", (msg, time) => {
-      setData([...data, {friendId:friend.id, sender: false, message: msg, time: time }]);
+    socket.on("message", (friendId,senderId,msg, time) => {
+      setData([...data, {friendId:friendId,senderId:senderId, sender: false, message: msg, time: time }]);
       console.log(msg,time);
     });
 
     return () => {
       socket.off("message");
     };
-  });
+  },[]);
 
   const messageSend = () => {
     socket.emit("message", {
       recieverId: friend.id,
+      senderId:userDetails,
       message,
     });
 
@@ -36,7 +37,7 @@ const Messages = ({ friend, setFriend }) => {
 
     setData([
       ...data,
-      { sender: true, friendId: friend.id, message: message, time: time },
+      { friendId: friend.id,senderId:userDetails,sender: true, message: message, time: time },
     ]);
 
     setMessage("");
@@ -71,7 +72,7 @@ const Messages = ({ friend, setFriend }) => {
             </div>
             <p>Online</p>
           </div>
-          <div className="w-full h-[90%] flex bg-cover bg-center ">
+          <div className="w-full flex-1 min-h-0 flex bg-cover bg-center ">
             <div className="w-full h-full overflow-y-scroll scrollbar-none flex flex-col gap-4 px-6 py-6">
               {data
                 .filter((msg) => msg.friendId === friend.id)

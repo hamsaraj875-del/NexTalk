@@ -18,6 +18,7 @@ const Chat = () => {
   const [notify, setNotify] = useState("");
   const [loader, setLoader] = useState(false);
   const [tab, selectTab] = useState("Chats");
+  const [userDetails,setUserDetails] = useState("");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -68,9 +69,11 @@ const Chat = () => {
               setNotify={setNotify}
               setLoader={setLoader}
               selectTab={selectTab}
+              setUserDetails={setUserDetails}
+              userDetails={userDetails}
             />
           </div>
-          <ChatContent tab={tab} className={`h-full `} />
+          <ChatContent userDetails={userDetails} tab={tab} className={`h-full `} />
         </div>
         <PopNotification setNotify={setNotify} notify={notify} />
         {loader && <MainLoader />}

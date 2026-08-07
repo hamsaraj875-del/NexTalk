@@ -77,6 +77,7 @@ app.post("/invite",user,controller.invite);
 app.post("/accept",user,controller.accept);
 app.post("/notifications",user,controller.notification);
 app.post("/userDetails",user,controller.hostDetails);
+app.post("/messages",user,controller.messages);
 
 socket(server);
 

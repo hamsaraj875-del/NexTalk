@@ -3,6 +3,7 @@
 //internal modules
 const database = require("../models/database");
 const friends = require("../models/friends");
+const messages = require("../models/messages");
 
 //authenticating the user
 
@@ -10,7 +11,7 @@ exports.authenticate = (req, res, next) => {
   if (req.session.isLoggedIn) {
     return res.status(200).json({
       success: true,
-      userId:req.session.userId,
+      userId: req.session.userId,
       message: "The user is logged in",
     });
   } else {
@@ -25,25 +26,28 @@ exports.authenticate = (req, res, next) => {
 
 exports.friends = async (req, res, next) => {
   try {
-    const friendsList = await friends.find({
-      $or: [
-        { user1: req.session.userId, status: "accepted" },
-        { user2: req.session.userId, status: "accepted" },
-      ],
-    }).populate("user1","name").populate("user2","name");
+    const friendsList = await friends
+      .find({
+        $or: [
+          { user1: req.session.userId, status: "accepted" },
+          { user2: req.session.userId, status: "accepted" },
+        ],
+      })
+      .populate("user1", "name")
+      .populate("user2", "name");
 
-    const result = friendsList.map(user=>{
+    const result = friendsList.map((user) => {
       let name;
-      let id
-      if(user.user1._id.toString()===req.session.userId){
+      let id;
+      if (user.user1._id.toString() === req.session.userId) {
         name = user.user2.name;
         id = user.user2._id;
-      }else{
+      } else {
         name = user.user1.name;
         id = user.user1._id;
       }
-      return {name,id};
-    })
+      return { name, id };
+    });
 
     return res.status(200).json({
       success: true,
@@ -130,7 +134,7 @@ exports.invite = async (req, res, next) => {
 
 //Invitation acceptation
 exports.accept = async (req, res, next) => {
-  const {id,name} = req.body;
+  const { id, name } = req.body;
   try {
     const result = await friends.findOneAndUpdate(
       { user1: id, user2: req.session.userId, status: "pending" },
@@ -139,7 +143,7 @@ exports.accept = async (req, res, next) => {
     if (result) {
       return res.status(200).json({
         success: true,
-        message: "Now "+name+" is your friend",
+        message: "Now " + name + " is your friend",
       });
     } else {
       return res.status(500).json({
@@ -199,6 +203,28 @@ exports.hostDetails = (req, res, next) => {
     return res.staus(500).json({
       success: false,
       message: "Unauthorised access please try again later!",
+    });
+  }
+};
+
+//messages
+exports.messages = async (req, res, next) => {
+  try {
+    const messages = await messages.find({
+      or: [
+        { senderId: req.session.userId },
+        { recieverId: req.session.userId },
+      ],
+    });
+    return res.status(200).json({
+      success: true,
+      message: messages,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      success: false,
+      message: "Server error occured",
     });
   }
 };

@@ -13,7 +13,7 @@ import { MdLogout } from "react-icons/md";
 //react files
 import Confirmation from "../common/Confirmation";
 
-const Sidebar = ({ selectTab, setAdjust, setLoader, setNotify }) => {
+const Sidebar = ({setUserDetails,userDetails, selectTab, setAdjust, setLoader, setNotify }) => {
   const navigate = useNavigate();
   const list = [
     { icon: CiChat2, name: "Chats" },
@@ -24,7 +24,6 @@ const Sidebar = ({ selectTab, setAdjust, setLoader, setNotify }) => {
   const [open, setOpen] = useState(true);
   const [tab, setTab] = useState("Chats");
   const [confirm, setConfirm] = useState(false);
-  const [userData, setUserData] = useState("");
 
   //logout
 
@@ -72,11 +71,11 @@ const Sidebar = ({ selectTab, setAdjust, setLoader, setNotify }) => {
         });
         const result = await response.json();
         if (result.success) {
-          setUserData(result.message);
+          setUserDetails(result.message);
         }
       } catch (err) {
         console.log(err);
-        setUserData("not found!");
+        setUserDetails("not found!");
       }
     };
     fetcher();
@@ -139,7 +138,7 @@ const Sidebar = ({ selectTab, setAdjust, setLoader, setNotify }) => {
             </button>
           </div>
           <div className="h-[10%] w-full flex flex-col px-4 border-r border-t  py-4 border-gray-800">
-            <p>{userData}</p>
+            <p>{userDetails}</p>
             <div className="flex justify-start items-center">
               <GoDotFill
                 size={15}
