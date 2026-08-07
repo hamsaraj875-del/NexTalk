@@ -195,9 +195,11 @@ exports.notification = async (req, res, next) => {
 //user data display
 exports.hostDetails = (req, res, next) => {
   if (req.session.isLoggedIn) {
+    const userId = req.session.userId;
+    const userName = req.session.userName;
     return res.status(200).json({
       success: true,
-      message: req.session.userName,
+      message: { userId, userName },
     });
   } else {
     return res.staus(500).json({
@@ -210,15 +212,21 @@ exports.hostDetails = (req, res, next) => {
 //messages
 exports.messages = async (req, res, next) => {
   try {
-    const messages = await messages.find({
-      or: [
-        { senderId: req.session.userId },
-        { recieverId: req.session.userId },
-      ],
+    const message = await messages
+      .find({
+        $or: [
+          { senderId: req.session.userId },
+          { receiverId: req.session.userId },
+        ],
+      })
+      .select("senderId receiverId message time");
+    const mes = message.map((mes) => {
+      mes.status = "sent";
+      return mes;
     });
     return res.status(200).json({
       success: true,
-      message: messages,
+      message: mes,
     });
   } catch (err) {
     console.log(err);

@@ -138,7 +138,7 @@ const Sidebar = ({setUserDetails,userDetails, selectTab, setAdjust, setLoader, s
             </button>
           </div>
           <div className="h-[10%] w-full flex flex-col px-4 border-r border-t  py-4 border-gray-800">
-            <p>{userDetails}</p>
+            <p>{userDetails.userName}</p>
             <div className="flex justify-start items-center">
               <GoDotFill
                 size={15}
@@ -164,7 +164,7 @@ const Sidebar = ({setUserDetails,userDetails, selectTab, setAdjust, setLoader, s
             >
               <IoIosArrowForward size={20} />
             </button>
-            <button className="bg-[#5d31ef] h-8 flex items-center justify-center text-center w-8 rounded-lg text-xl font-bold">
+            <button className="bg-[#5d31ef] h-11 flex items-center justify-center text-center w-11 rounded-lg text-xl font-bold">
               <span>+</span>
             </button>
             {list.map(({ icon: Icon, name }) => (

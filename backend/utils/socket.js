@@ -18,36 +18,40 @@ server = async (server) => {
     },
   });
   io.on("connection", (socket) => {
-    console.log("User connected:", socket.id);
-
     socket.on("register", (userId) => {
       onlineUser.set(userId, socket.id);
       onlineSocket.set(socket.id, userId);
     });
 
     socket.on("message", async (data) => {
-      const recieverSocketId = onlineUser.get(data.recieverId);
+      const recieverSocketId = onlineUser.get(data.receiverId);
       const senderId = onlineSocket.get(socket.id);
-      const recieverId = data.recieverId;
+      const receiverId = data.receiverId;
       const message = data.message;
 
       const connection = await friends.findOne({
         $or: [
-          { user1: senderId, user2: recieverId },
-          { user1: recieverId, user2: senderId },
+          { user1: senderId, user2: receiverId },
+          { user1: receiverId, user2: senderId },
         ],
       });
-      if (connection && connection.status==="accepted") {
+      if (connection && connection.status === "accepted") {
         const time = new Date().toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
           hour12: true,
         });
         if (recieverSocketId) {
-          io.to(recieverSocketId).emit("message",recieverId,senderId, message, time);
+          io.to(recieverSocketId).emit(
+            "message",
+            senderId,
+            receiverId,
+            message,
+            time,
+          );
           const details = new messages({
             senderId,
-            recieverId,
+            receiverId,
             message,
             time,
             status: "sent",
@@ -56,7 +60,7 @@ server = async (server) => {
         } else {
           const details = new messages({
             senderId,
-            recieverId,
+            receiverId,
             message,
             time,
             status: "pending",
@@ -66,8 +70,6 @@ server = async (server) => {
       }
     });
 
-    console.log("online users are ", onlineUser);
-
     socket.on("disconnect", () => {
       for (const [userId, socketId] of onlineUser) {
         if (socketId === socket.id) {
@@ -75,11 +77,6 @@ server = async (server) => {
           break;
         }
       }
-
-      console.log("online users are");
-      console.log(onlineUser);
-
-      console.log("User disconnected:", socket.id);
     });
   });
 };

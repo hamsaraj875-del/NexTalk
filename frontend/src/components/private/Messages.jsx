@@ -7,25 +7,63 @@ import { BsFillSendFill } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa6";
 import { IoArrowBackOutline } from "react-icons/io5";
 
-const Messages = ({ userDetails,friend, setFriend }) => {
+//internal modules
+import MainLoader from "../common/Loader";
+
+const Messages = ({ userDetails, friend, setFriend }) => {
   const [message, setMessage] = useState("");
   const [data, setData] = useState([]);
+  const [loader, setLoader] = useState(false);
 
   useEffect(() => {
-    socket.on("message", (friendId,senderId,msg, time) => {
-      setData([...data, {friendId:friendId,senderId:senderId, sender: false, message: msg, time: time }]);
-      console.log(msg,time);
+    const controller = new AbortController();
+    const signal = controller.signal;
+    setLoader(true);
+    const fetcher = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_LINK}/messages`, {
+          signal,
+          method: "POST",
+          credentials: "include",
+        });
+        const result = await response.json();
+        if (result.success) {
+          setData(result.message);
+        }
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLoader(false);
+      }
+    };
+    fetcher();
+    return () => {
+      controller.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    socket.on("message", (senderId, friendId, msg, time) => {
+      setData((prevData) => [
+        ...prevData,
+        {
+          senderId: senderId,
+          receiverId: friendId,
+          message: msg,
+          time: time,
+        },
+      ]);
     });
 
     return () => {
       socket.off("message");
     };
-  },[]);
+  }, []);
 
   const messageSend = () => {
     socket.emit("message", {
-      recieverId: friend.id,
-      senderId:userDetails,
+      receiverId: friend.id,
+      senderId: userDetails.userId,
       message,
     });
 
@@ -37,7 +75,12 @@ const Messages = ({ userDetails,friend, setFriend }) => {
 
     setData([
       ...data,
-      { friendId: friend.id,senderId:userDetails,sender: true, message: message, time: time },
+      {
+        senderId: userDetails.userId,
+        receiverId: friend.id,
+        message: message,
+        time: time,
+      },
     ]);
 
     setMessage("");
@@ -73,22 +116,30 @@ const Messages = ({ userDetails,friend, setFriend }) => {
             <p>Online</p>
           </div>
           <div className="w-full flex-1 min-h-0 flex bg-cover bg-center ">
-            <div className="w-full h-full overflow-y-scroll scrollbar-none flex flex-col gap-4 px-6 py-6">
-              {data
-                .filter((msg) => msg.friendId === friend.id)
-                .map(({ sender, message, time }) => (
-                  <div
-                    className={`${sender ? "right-1 bg-gradient-to-r from-indigo-800 to-indigo-700 self-end rounded-l-2xl rounded-b-2xl" : "left-1 bg-gray-900 self-start rounded-r-2xl rounded-b-2xl"} max-w-140 px-4 py-2 flex flex-col `}
-                  >
-                    <p className="text-white-400 text-lg font-mono">
-                      {message}
-                    </p>
-                    <p className="text-xs text-gray-400 right-1 self-end">
-                      {time}
-                    </p>
-                  </div>
-                ))}
-            </div>
+            {loader ? (
+              <MainLoader />
+            ) : (
+              <div className="w-full h-full overflow-y-scroll scrollbar-none flex flex-col gap-4 px-6 py-6">
+                {data
+                  .filter(
+                    (msg) =>
+                      msg.receiverId === friend.id ||
+                      msg.senderId === friend.id,
+                  )
+                  .map(({ senderId, receiverId, message, time }) => (
+                    <div
+                      className={`${senderId == userDetails.userId ? "right-1 bg-gradient-to-r from-indigo-800 to-indigo-700 self-end rounded-l-2xl rounded-b-2xl" : "left-1 bg-gray-900 self-start rounded-r-2xl rounded-b-2xl"} max-w-140 px-4 py-2 flex flex-col `}
+                    >
+                      <p className="text-white-400 text-lg font-mono">
+                        {message}
+                      </p>
+                      <p className="text-xs text-gray-400 right-1 self-end">
+                        {time}
+                      </p>
+                    </div>
+                  ))}
+              </div>
+            )}
           </div>
           <div className="w-full h-26 px-6 py-2">
             <div className=" h-15 px-4 py-2 bg-black border border-gray-800 rounded-2xl flex justify-center items-center">
