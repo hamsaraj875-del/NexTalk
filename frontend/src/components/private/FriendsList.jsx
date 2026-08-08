@@ -1,4 +1,4 @@
-const FriendsList = ({friend,setFriend,friendsList,setFriendsList}) => {
+const FriendsList = ({onlineUser,friend,setFriend,friendsList,setFriendsList}) => {
   return (
     <>
       {friendsList.length != 0 ? (
@@ -16,7 +16,7 @@ const FriendsList = ({friend,setFriend,friendsList,setFriendsList}) => {
                   className="w-12 h-12 object-cover rounded-full"
                 />
 
-                {name && (
+                {onlineUser.includes(id) && (
                   <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-[#0F071C] " />
                 )}
               </div>

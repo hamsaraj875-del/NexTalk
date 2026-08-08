@@ -6,17 +6,19 @@ import { useNavigate } from "react-router-dom";
 import FriendsList from "./FriendsList";
 import SearchList from "./SearchList";
 import NotificationList from "./NotificationList";
+import socket from "./socket";
 
 //react icons
 import { MdOutlineAccountCircle } from "react-icons/md";
 
-const Friends = ({ tab, setFriend,friend }) => {
+const Friends = ({ tab, setFriend, friend }) => {
   const [friendsList, setFriendsList] = useState([]);
   const [notificationList, setNotificationList] = useState([]);
-  const [searchList,setSearchList] = useState([]);
+  const [searchList, setSearchList] = useState([]);
   const [search, setSearch] = useState([]);
   const [loader, setLoader] = useState([]);
-  
+  const [onlineUser, setOnlineUser] = useState([]);
+
   useEffect(() => {
     if (tab === "Friends") {
       const controller = new AbortController();
@@ -34,10 +36,10 @@ const Friends = ({ tab, setFriend,friend }) => {
             setFriendsList(result.message);
           }
         };
-      fetcher();
+        fetcher();
       } catch (err) {
         console.log(err);
-      }finally{
+      } finally {
         setLoader(false);
       }
       return () => {
@@ -64,7 +66,7 @@ const Friends = ({ tab, setFriend,friend }) => {
             setFriendsList(result.message);
           }
         };
-      fetcher();
+        fetcher();
       } catch (err) {
         console.log(err);
       }
@@ -90,6 +92,15 @@ const Friends = ({ tab, setFriend,friend }) => {
       console.error(error);
     }
   };
+
+  useEffect(() => {
+    socket.on("onlineUser", (data) => {
+      setOnlineUser(data);
+    });
+    return () => {
+      socket.off("onlineUser");
+    };
+  }, []);
   return (
     <>
       <div className="w-full h-screen bg-black text-white border-r border-gray-900 flex flex-col">
@@ -109,9 +120,24 @@ const Friends = ({ tab, setFriend,friend }) => {
             className="w-full border border-gray-700 bg-[#080017] rounded-xl px-4 py-3 outline-none text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500"
           />
         </div>
-        {tab === "Friends" && <FriendsList friend={friend} friendsList={friendsList} setFriend={setFriend} setFriendsList={setFriendsList} />}
-        {tab === "Chats" && <SearchList searchList={searchList} setSearchList={setSearchList} />}
-        {tab === "Notifications" && <NotificationList setNotificationList={setNotificationList} notificationList ={notificationList} />}
+        {tab === "Friends" && (
+          <FriendsList
+          onlineUser={onlineUser}
+            friend={friend}
+            friendsList={friendsList}
+            setFriend={setFriend}
+            setFriendsList={setFriendsList}
+          />
+        )}
+        {tab === "Chats" && (
+          <SearchList searchList={searchList} setSearchList={setSearchList} />
+        )}
+        {tab === "Notifications" && (
+          <NotificationList
+            setNotificationList={setNotificationList}
+            notificationList={notificationList}
+          />
+        )}
       </div>
     </>
   );

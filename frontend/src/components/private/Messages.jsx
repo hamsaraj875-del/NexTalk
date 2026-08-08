@@ -61,6 +61,10 @@ const Messages = ({ userDetails, friend, setFriend }) => {
   }, []);
 
   const messageSend = () => {
+    if(message.length==0){
+      console.log("empty");
+      return ;
+    }
     socket.emit("message", {
       receiverId: friend.id,
       senderId: userDetails.userId,

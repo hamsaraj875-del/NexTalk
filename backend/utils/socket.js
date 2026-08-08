@@ -21,13 +21,15 @@ server = async (server) => {
     socket.on("register", (userId) => {
       onlineUser.set(userId, socket.id);
       onlineSocket.set(socket.id, userId);
+
+      io.emit("onlineUser",[...onlineUser.keys()])
     });
 
     socket.on("message", async (data) => {
       const recieverSocketId = onlineUser.get(data.receiverId);
       const senderId = onlineSocket.get(socket.id);
       const receiverId = data.receiverId;
-      const message = data.message;
+      const message = data.message.trim();
 
       const connection = await friends.findOne({
         $or: [
