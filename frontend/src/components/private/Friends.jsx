@@ -11,13 +11,12 @@ import socket from "./socket";
 //react icons
 import { MdOutlineAccountCircle } from "react-icons/md";
 
-const Friends = ({ tab, setFriend, friend }) => {
+const Friends = ({ tab, setFriend, friend,onlineUser }) => {
   const [friendsList, setFriendsList] = useState([]);
   const [notificationList, setNotificationList] = useState([]);
   const [searchList, setSearchList] = useState([]);
   const [search, setSearch] = useState([]);
   const [loader, setLoader] = useState([]);
-  const [onlineUser, setOnlineUser] = useState([]);
 
   useEffect(() => {
     if (tab === "Friends") {
@@ -93,14 +92,7 @@ const Friends = ({ tab, setFriend, friend }) => {
     }
   };
 
-  useEffect(() => {
-    socket.on("onlineUser", (data) => {
-      setOnlineUser(data);
-    });
-    return () => {
-      socket.off("onlineUser");
-    };
-  }, []);
+
   return (
     <>
       <div className="w-full h-screen bg-black text-white border-r border-gray-900 flex flex-col">

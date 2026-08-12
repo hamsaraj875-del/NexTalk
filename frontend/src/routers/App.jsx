@@ -13,6 +13,7 @@ import NotFound from "../components/common/NotFound";
 import Loader from "../components/common/Loader";
 import MainLoader from "../components/common/MainLoader"
 import Confirmation from "../components/common/Confirmation";
+import CreateRoom from "../components/private/CreateRoom";
 import "../App.css";
 
 
@@ -37,6 +38,9 @@ const Router = createBrowserRouter([
   },
   {path:"/loader",
     element:<Confirmation />
+  },
+  {path:"/create",
+    element:<CreateRoom />
   },
   {
     path: "*",

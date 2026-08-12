@@ -13,8 +13,17 @@ import { MdLogout } from "react-icons/md";
 //react files
 import Confirmation from "../common/Confirmation";
 
-const Sidebar = ({setUserDetails,userDetails, selectTab, setAdjust, setLoader, setNotify }) => {
+const Sidebar = ({
+  setCreateRoom,
+  setUserDetails,
+  userDetails,
+  selectTab,
+  setAdjust,
+  setLoader,
+  setNotify,
+}) => {
   const navigate = useNavigate();
+  
   const list = [
     { icon: CiChat2, name: "Chats" },
     { icon: MdOutlineGroup, name: "Friends" },
@@ -23,15 +32,17 @@ const Sidebar = ({setUserDetails,userDetails, selectTab, setAdjust, setLoader, s
   ];
   const [open, setOpen] = useState(true);
   const [tab, setTab] = useState("Chats");
+  const [message,setMessage] = useState("");
   const [confirm, setConfirm] = useState(false);
 
-  //logout
 
   const confirmLogout = () => {
+    setMessage("Are you sure you want to log out ?");
     setConfirm(true);
   };
+  
 
-  const logout = async (confirmation) => {
+  const fact = async (confirmation) => {
     setConfirm(false);
     if (confirmation) {
       try {
@@ -45,7 +56,6 @@ const Sidebar = ({setUserDetails,userDetails, selectTab, setAdjust, setLoader, s
           },
         );
         const result = await response.json();
-        console.log(result);
         if (result.success) {
           sessionStorage.removeItem("user");
           navigate("/auth/login");
@@ -64,11 +74,14 @@ const Sidebar = ({setUserDetails,userDetails, selectTab, setAdjust, setLoader, s
     const signal = controller.signal;
     const fetcher = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_LINK}/userDetails`,{
-          signal,
-          method:"POST",
-          credentials:"include",
-        });
+        const response = await fetch(
+          `${import.meta.env.VITE_LINK}/userDetails`,
+          {
+            signal,
+            method: "POST",
+            credentials: "include",
+          },
+        );
         const result = await response.json();
         if (result.success) {
           setUserDetails(result.message);
@@ -79,17 +92,17 @@ const Sidebar = ({setUserDetails,userDetails, selectTab, setAdjust, setLoader, s
       }
     };
     fetcher();
-    return()=>{
+    return () => {
       controller.abort();
-    }
-  },[]);
+    };
+  }, []);
 
   return (
     <>
       {confirm && (
         <Confirmation
-          message={"Are you sure you want to log out?"}
-          logout={logout}
+          message={message}
+          fact={fact}
         />
       )}
       {open && (
@@ -97,8 +110,7 @@ const Sidebar = ({setUserDetails,userDetails, selectTab, setAdjust, setLoader, s
           <div className="h-[90%] bg-black w-full flex flex-col gap-4 px-2 py-1 border-r border-gray-800">
             <div className="flex justify-between items-center w-full h-20 px-2">
               <div className="w-fit flex ">
-                <img src="logo.png" className="size-10 bg-cover"></img>
-                <p className="text-white text-2xl">NexTalk</p>
+                <p className="bg-gradient-to-r from-purple-700 to-blue-700 font-mono font-bold bg-clip-text text-transparent text-3xl">NexTalk</p>
               </div>
               <button
                 className="cursor-pointer"
@@ -109,10 +121,12 @@ const Sidebar = ({setUserDetails,userDetails, selectTab, setAdjust, setLoader, s
                 <IoIosArrowBack size={20} />
               </button>
             </div>
-            <button className="bg-[#5d31ef] h-10 w-full flex justify-center cursor-pointer items-center rounded-lg">
-              <span className="text-xl px-1 text-center mb-1 font-bold">+</span>
-              <p className="font-bold">New Chat</p>
-            </button>
+              <button onClick={()=>setCreateRoom(true)} className="bg-[#5725f8] h-10 w-full flex justify-center cursor-pointer items-center rounded-lg">
+                <p className="font-bold text-sm">Create Room</p>
+              </button>
+              <button className="bg-transparent border border-gray-700 hover:border-indigo-700 hover:bg-indigo-600/10 h-10 w-full flex justify-center cursor-pointer items-center rounded-lg">
+                <p className="font-bold text-sm">Join Room</p>
+              </button>
             {list.map(({ icon: Icon, name }) => {
               return (
                 <div
@@ -122,9 +136,11 @@ const Sidebar = ({setUserDetails,userDetails, selectTab, setAdjust, setLoader, s
                   }}
                   key={name}
                   className={`rounded-lg 
-                  ${tab === name ? "bg-[#5d31ef]" : "hover:bg-[#120428]"}  w-full h-12 flex justify-start px-2 items-center transform duration-300 cursor-pointer`}
+                  ${tab === name ? "bg-[#3a19a4] group" : "hover:bg-[#120833]"} w-full h-12 flex justify-start px-2 items-center transform duration-300 cursor-pointer`}
                 >
-                  <Icon className="mr-1" />
+                  <Icon
+                    className={`mr-1 ${tab === name ? "text-yellow-400" : ""}`}
+                  />
                   <p>{name}</p>
                 </div>
               );
@@ -137,14 +153,26 @@ const Sidebar = ({setUserDetails,userDetails, selectTab, setAdjust, setLoader, s
               <p>Logout</p>
             </button>
           </div>
-          <div className="h-[10%] w-full flex flex-col px-4 border-r border-t  py-4 border-gray-800">
-            <p>{userDetails.userName}</p>
-            <div className="flex justify-start items-center">
-              <GoDotFill
-                size={15}
-                className="text-green-400 animate-ping mr-2"
-              />
-              <p>Online</p>
+          <div className="w-full p-6 bg-black border-r border-gray-800">
+            <div className="flex items-center gap-3 p-2 border border-gray-700
+                     hover:border-indigo-700 hover:bg-[#120d20] rounded-xl transition-all duration-300">
+              <div
+                className={`bg-indigo-600 w-11 h-11 rounded-full flex items-center justify-center text-white font-semibold`}
+              >
+                {userDetails.userName?userDetails.userName.charAt(0).toUpperCase() : '?'}
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <p className="text-white font-semibold truncate">
+                  {userDetails.userName}
+                </p>
+
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
+
+                  <span className="text-xs text-green-400">Online</span>
+                </div>
+              </div>
             </div>
           </div>
         </>

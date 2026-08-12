@@ -10,7 +10,7 @@ import { IoArrowBackOutline } from "react-icons/io5";
 //internal modules
 import MainLoader from "../common/Loader";
 
-const Messages = ({ userDetails, friend, setFriend }) => {
+const Messages = ({ userDetails, friend, setFriend, onlineUser }) => {
   const [message, setMessage] = useState("");
   const [data, setData] = useState([]);
   const [loader, setLoader] = useState(false);
@@ -61,9 +61,9 @@ const Messages = ({ userDetails, friend, setFriend }) => {
   }, []);
 
   const messageSend = () => {
-    if(message.length==0){
+    if (message.length == 0) {
       console.log("empty");
-      return ;
+      return;
     }
     socket.emit("message", {
       receiverId: friend.id,
@@ -117,7 +117,14 @@ const Messages = ({ userDetails, friend, setFriend }) => {
               />
               <p className="text-xl">{friend.name}</p>
             </div>
-            <p>Online</p>
+            <div
+              className={`${onlineUser.includes(friend.id) ? "text-green-400" : "text-red-400 animate-pulse"} flex justify-center items-center gap-1 `}
+            >
+              {onlineUser.includes(friend.id) && (
+                <span className="w-2 h-2 rounded-full bg-green-500"></span>
+              )}
+              {onlineUser.includes(friend.id) ? "Online" : "Offline"}
+            </div>
           </div>
           <div className="w-full flex-1 min-h-0 flex bg-cover bg-center ">
             {loader ? (
@@ -134,7 +141,7 @@ const Messages = ({ userDetails, friend, setFriend }) => {
                     <div
                       className={`${senderId == userDetails.userId ? "right-1 bg-gradient-to-r from-indigo-800 to-indigo-700 self-end rounded-l-2xl rounded-b-2xl" : "left-1 bg-gray-900 self-start rounded-r-2xl rounded-b-2xl"} max-w-140 px-4 py-2 flex flex-col `}
                     >
-                      <p className="text-white-400 text-lg font-mono">
+                      <p className="text-white-400 text-lg font-mono">  
                         {message}
                       </p>
                       <p className="text-xs text-gray-400 right-1 self-end">
