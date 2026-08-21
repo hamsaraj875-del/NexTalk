@@ -62,7 +62,7 @@ const Chat = () => {
   return (
     <>
       <div className="h-screen w-screen bg-[#0c021a] text-white">
-        {createRoom && <CreateRoom />}
+        {createRoom && <CreateRoom setCreateRoom={setCreateRoom} />}
         <div className="w-full h-full flex ">
           <div
             className={`h-full ${adjust ? " w-[5%]" : "w-[18%]"} transition-all duration-400 ease-in-out flex flex-col justify-between`}

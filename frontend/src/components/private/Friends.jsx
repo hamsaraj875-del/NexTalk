@@ -6,17 +6,18 @@ import { useNavigate } from "react-router-dom";
 import FriendsList from "./FriendsList";
 import SearchList from "./SearchList";
 import NotificationList from "./NotificationList";
+import Loader from "../common/Loader";
 import socket from "./socket";
 
 //react icons
 import { MdOutlineAccountCircle } from "react-icons/md";
 
-const Friends = ({ tab, setFriend, friend,onlineUser }) => {
+const Friends = ({ tab, setFriend, friend, onlineUser }) => {
   const [friendsList, setFriendsList] = useState([]);
   const [notificationList, setNotificationList] = useState([]);
   const [searchList, setSearchList] = useState([]);
   const [search, setSearch] = useState([]);
-  const [loader, setLoader] = useState([]);
+  const [loader, setLoader] = useState(false);
 
   useEffect(() => {
     if (tab === "Friends") {
@@ -68,6 +69,8 @@ const Friends = ({ tab, setFriend, friend,onlineUser }) => {
         fetcher();
       } catch (err) {
         console.log(err);
+      } finally {
+        setLoader(false);
       }
       return () => {
         controller.abort();
@@ -76,6 +79,7 @@ const Friends = ({ tab, setFriend, friend,onlineUser }) => {
   }, [tab]);
 
   const searchFriends = async () => {
+    setLoader(true);
     try {
       const response = await fetch(
         `${import.meta.env.VITE_LINK}/search?name=${encodeURIComponent(search.trim())}`,
@@ -89,14 +93,15 @@ const Friends = ({ tab, setFriend, friend,onlineUser }) => {
       setSearchList(result.message);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoader(false);
     }
   };
-
 
   return (
     <>
       <div className="w-full h-screen bg-black text-white border-r border-gray-900 flex flex-col">
-        <div className="sticky top-0 z-10 bg-black p-4 border-b border-[#221339]">
+        {tab==="Chats" && <div className="sticky top-0 z-10 bg-black p-4 border-b border-[#221339]">
           <input
             type="text"
             value={search}
@@ -111,10 +116,11 @@ const Friends = ({ tab, setFriend, friend,onlineUser }) => {
             placeholder="Search friends..."
             className="w-full border border-gray-700 bg-[#080017] rounded-xl px-4 py-3 outline-none text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500"
           />
-        </div>
-        {tab === "Friends" && (
+        </div>}
+
+        {loader?(<Loader />):(<>{tab === "Friends" && (
           <FriendsList
-          onlineUser={onlineUser}
+            onlineUser={onlineUser}
             friend={friend}
             friendsList={friendsList}
             setFriend={setFriend}
@@ -129,7 +135,8 @@ const Friends = ({ tab, setFriend, friend,onlineUser }) => {
             setNotificationList={setNotificationList}
             notificationList={notificationList}
           />
-        )}
+        )}</>)}
+        
       </div>
     </>
   );

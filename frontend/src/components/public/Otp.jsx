@@ -20,7 +20,7 @@ const VerifyOTP = () => {
     newOtp[index] = value;
     setOtp(newOtp);
 
-    if (value && index < 5) {
+    if (value && index < 6) {
       document.getElementById(`otp-${index + 1}`).focus();
     }
   };

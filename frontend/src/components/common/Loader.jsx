@@ -1,8 +1,10 @@
 const Loader = () => {
   return (
-    <div className="flex justify-center items-center w-12 h-12 p-[5px] bg-[linear-gradient(to_right,#7800e8,#0074e8)] rounded-full animate-spin ">
-      <div className=" w-full h-full rounded-full bg-gray-900 "></div>
-    </div>
+    <>
+    <div className="w-full h-12 flex items-center justify-center" >
+    <div className="flex rounded-full justify-center items-center border-3 border-t-blue border-b-gray-600 border-black animate-spin w-8 h-8">
+    </div></div>
+    </>
   );
 };
 
