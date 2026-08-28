@@ -24,8 +24,8 @@ const Friends = ({ tab, setFriend, friend, onlineUser }) => {
       const controller = new AbortController();
       const signal = controller.signal;
       setLoader(true);
-      try {
-        const fetcher = async () => {
+      const fetcher = async () => {
+        try {
           const response = await fetch(`${import.meta.env.VITE_LINK}/friends`, {
             signal,
             credentials: "include",
@@ -35,12 +35,14 @@ const Friends = ({ tab, setFriend, friend, onlineUser }) => {
           if (result.success) {
             setFriendsList(result.message);
           }
-        };
+        } catch (err) {
+          console.log(err);
+        } finally {
+          setLoader(false);
+        }
+      };
+      if (tab === "Friends") {
         fetcher();
-      } catch (err) {
-        console.log(err);
-      } finally {
-        setLoader(false);
       }
       return () => {
         controller.abort();
@@ -49,8 +51,8 @@ const Friends = ({ tab, setFriend, friend, onlineUser }) => {
       const controller = new AbortController();
       const signal = controller.signal;
       setLoader(true);
-      try {
-        const fetcher = async () => {
+      const fetcher = async () => {
+        try {
           const response = await fetch(
             `${import.meta.env.VITE_LINK}/notifications`,
             {
@@ -65,24 +67,30 @@ const Friends = ({ tab, setFriend, friend, onlineUser }) => {
           if (result.success) {
             setFriendsList(result.message);
           }
-        };
-        fetcher();
-      } catch (err) {
-        console.log(err);
-      } finally {
-        setLoader(false);
-      }
+        } catch (err) {
+          console.log(err);
+        } finally {
+          setLoader(false);
+        }
+      };
+      fetcher();
       return () => {
         controller.abort();
       };
     }
   }, [tab]);
 
-  const searchFriends = async () => {
+  const searchFriends = async (searchValue) => {
+    const name = searchValue.trim();
+    if (!name) {
+      setSearchList([]);
+      setLoader(false);
+      return;
+    }
     setLoader(true);
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_LINK}/search?name=${encodeURIComponent(search.trim())}`,
+        `${import.meta.env.VITE_LINK}/search?name=${encodeURIComponent(searchValue.trim())}`,
         {
           method: "POST",
           credentials: "include",
@@ -100,43 +108,54 @@ const Friends = ({ tab, setFriend, friend, onlineUser }) => {
 
   return (
     <>
-      <div className="w-full h-screen bg-black text-white border-r border-gray-900 flex flex-col">
-        {tab==="Chats" && <div className="sticky top-0 z-10 bg-black p-4 border-b border-[#221339]">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-            }}
-            onKeyDown={(e) => {
-              if (e.key == "Enter") {
-                searchFriends();
-              }
-            }}
-            placeholder="Search friends..."
-            className="w-full border border-gray-700 bg-[#080017] rounded-xl px-4 py-3 outline-none text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500"
-          />
-        </div>}
+      <div className=" rounded-lg w-full h-screen bg-black text-white border-r border-gray-900 flex flex-col">
+        {tab === "Search" && (
+          <div className="sticky top-0 z-10 bg-black p-4 border-b border-[#221339]">
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                searchFriends(e.target.value);
+              }}
+              onKeyDown={(e) => {
+                if (e.key == "Enter") {
+                  searchFriends(e.target.value);
+                }
+              }}
+              placeholder="Search friends..."
+              className="w-full border border-gray-700 bg-[#080017] rounded-xl px-4 py-3 outline-none text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        )}
 
-        {loader?(<Loader />):(<>{tab === "Friends" && (
-          <FriendsList
-            onlineUser={onlineUser}
-            friend={friend}
-            friendsList={friendsList}
-            setFriend={setFriend}
-            setFriendsList={setFriendsList}
-          />
+        {loader ? (
+          <Loader />
+        ) : (
+          <>
+            {tab === "Friends" && (
+              <FriendsList
+                onlineUser={onlineUser}
+                friend={friend}
+                friendsList={friendsList}
+                setFriend={setFriend}
+                setFriendsList={setFriendsList}
+              />
+            )}
+            {tab === "Search" && (
+              <SearchList
+                searchList={searchList}
+                setSearchList={setSearchList}
+              />
+            )}
+            {tab === "Notifications" && (
+              <NotificationList
+                setNotificationList={setNotificationList}
+                notificationList={notificationList}
+              />
+            )}
+          </>
         )}
-        {tab === "Chats" && (
-          <SearchList searchList={searchList} setSearchList={setSearchList} />
-        )}
-        {tab === "Notifications" && (
-          <NotificationList
-            setNotificationList={setNotificationList}
-            notificationList={notificationList}
-          />
-        )}</>)}
-        
       </div>
     </>
   );

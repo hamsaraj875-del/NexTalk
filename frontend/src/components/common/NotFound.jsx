@@ -5,7 +5,7 @@ const NotFound = () => {
 
   const clickHandler=(e)=>{
     e.preventDefault();
-    navigate("/auth/login");
+    navigate("/chat");
   }
   
   return (

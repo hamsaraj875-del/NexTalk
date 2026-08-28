@@ -9,6 +9,7 @@ const friends = require("../models/friends");
 
 let onlineUser = new Map();
 let onlineSocket = new Map();
+let onlineGroupUser = new Map();
 
 server = async (server) => {
   const io = new Server(server, {
@@ -71,6 +72,16 @@ server = async (server) => {
         }
       }
     });
+
+    socket.on("joinRoom",(roomId,userId)=>{
+      socket.join(roomId);
+      onlineGroupUser.set(userId,roomId);
+      
+    });
+
+    socket.on("roomMessage",(roomId,userId,message)=>{
+      io.to(socket.id).emit("roomMessage",message);
+    })
 
     socket.on("disconnect", () => {
       for (const [userId, socketId] of onlineUser) {

@@ -19,7 +19,7 @@ const SearchList = ({ searchList, setSearchList }) => {
         setSearchList((prev) =>
           prev.map((user) =>
             user.userId === userId
-              ? { ...user, userStatus: "Request Sent" }
+              ? { ...user, userStatus: "pending" }
               : user,
           ),
         );
@@ -43,8 +43,8 @@ const SearchList = ({ searchList, setSearchList }) => {
           px-3
           rounded-2xl
           flex items-center justify-between
-          bg-gradient-to-r from-indigo-950/30 to-indigo-950/90
-          hover:bg-gradient-to-r hover:from-indigo-950/90 hover:to-indigo-950/30
+          bg-gradient-to-r from-indigo-950/50 to-indigo-950/80
+          hover:bg-gradient-to-r hover:from-indigo-950/70 hover:to-indigo-950
           border border-white/5
           shadow-md shadow-black/10
           hover:border-indigo-500/30
@@ -104,6 +104,7 @@ const SearchList = ({ searchList, setSearchList }) => {
                   shadow-md shadow-green-500/10
                   hover:from-emerald-300
                   hover:to-green-400
+                  cursor-pointer
                   hover:shadow-lg hover:shadow-green-500/20
                   hover:-translate-y-0.5
                   active:scale-95

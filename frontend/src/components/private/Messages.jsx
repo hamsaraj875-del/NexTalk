@@ -8,7 +8,7 @@ import { FaPlus } from "react-icons/fa6";
 import { IoArrowBackOutline } from "react-icons/io5";
 
 //internal modules
-import MainLoader from "../common/Loader";
+import Loader from "../common/Loader";
 
 const Messages = ({ userDetails, friend, setFriend, onlineUser }) => {
   const [message, setMessage] = useState("");
@@ -128,7 +128,7 @@ const Messages = ({ userDetails, friend, setFriend, onlineUser }) => {
           </div>
           <div className="w-full flex-1 min-h-0 flex bg-cover bg-center ">
             {loader ? (
-              <MainLoader />
+              <Loader />
             ) : (
               <div className="w-full h-full overflow-y-scroll scrollbar-none flex flex-col gap-4 px-6 py-6">
                 {data
@@ -139,9 +139,9 @@ const Messages = ({ userDetails, friend, setFriend, onlineUser }) => {
                   )
                   .map(({ senderId, receiverId, message, time }) => (
                     <div
-                      className={`${senderId == userDetails.userId ? "right-1 bg-gradient-to-r from-indigo-800 to-indigo-700 self-end rounded-l-2xl rounded-b-2xl" : "left-1 bg-gray-900 self-start rounded-r-2xl rounded-b-2xl"} max-w-140 px-4 py-2 flex flex-col `}
+                      className={`${senderId == userDetails.userId ? "right-1 bg-gradient-to-r from-indigo-800 to-indigo-700 self-end rounded-t-2xl rounded-l-2xl" : "left-1 bg-gray-900 self-start rounded-r-2xl rounded-t-2xl"} max-w-140 px-4 py-2 flex flex-col `}
                     >
-                      <p className="text-white-400 text-lg font-mono">  
+                      <p className="text-white-400 text-[16px]">  
                         {message}
                       </p>
                       <p className="text-xs text-gray-400 right-1 self-end">

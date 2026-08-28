@@ -1,10 +1,4 @@
-const FriendsList = ({
-  onlineUser,
-  friend,
-  setFriend,
-  friendsList,
-  setFriendsList,
-}) => {
+const RoomSidebar = ({ groupList }) => {
   const avatarColors = {
     A: "bg-[#155E75]", // Dark Cyan
     B: "bg-[#1E40AF]", // Dark Blue
@@ -35,20 +29,16 @@ const FriendsList = ({
   };
   return (
     <>
-      {friendsList.length != 0 ? (
+      {groupList.length != 0 ? (
         <div className="flex-1 overflow-y-auto scrollbar-none p-3 space-y-2">
-          {friendsList.map(({ name, id, status }) => (
+          {friendsList.map(({ name, id }) => (
             <div
               key={id}
-              onClick={() => setFriend({ name, id })}
               className={`
     group flex items-center gap-3 p-3 rounded-xl cursor-pointer
     transition-all duration-300
-    ${
-      friend?.id === id
-        ? "bg-gradient-to-r from-indigo-950/70 to-indigo-950 border border-indigo-600/60 shadow-md shadow-indigo-900/30"
-        : "border border-transparent hover:bg-gradient-to-r hover:from-indigo-950/50 hover:to-indigo-950/80 hover:border-indigo-800/30"
-    }
+  bg-gradient-to-r from-indigo-950/70 to-indigo-950 border border-indigo-600/60 shadow-md shadow-indigo-900/30"
+        : "border hover:bg-gradient-to-r hover:from-indigo-950/50 hover:to-indigo-950/80 hover:border-indigo-800/30"
   `}
             >
               <div className="relative">
@@ -57,30 +47,22 @@ const FriendsList = ({
                 >
                   {name.charAt(0).toUpperCase()}
                 </div>
-
-                {onlineUser.includes(id) && (
-                  <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-[#0F071C] " />
-                )}
               </div>
 
               <div className="flex-1 overflow-hidden">
                 <div className="flex justify-between items-center">
                   <h2 className="font-semibold text-white ">{name}</h2>
-
-                  <span className="text-xs text-gray-500"></span>
                 </div>
-
-                <p className="text-sm text-gray-500 truncate"></p>
               </div>
             </div>
           ))}
         </div>
       ) : (
         <div className="w-full h-full flex flex-col items-center justify-start text-center text-gray-500">
-          <p className="h-fit w-fit mt-24">No friends yet !</p>
+          <p className="h-fit w-fit mt-24">No one joined yet !</p>
         </div>
       )}
     </>
   );
 };
-export default FriendsList;
+export default RoomSidebar;

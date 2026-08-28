@@ -18,7 +18,7 @@ const Chat = () => {
   const [adjust, setAdjust] = useState(false);
   const [notify, setNotify] = useState("");
   const [loader, setLoader] = useState(false);
-  const [tab, selectTab] = useState("Chats");
+  const [tab, selectTab] = useState("Search");
   const [userDetails, setUserDetails] = useState("");
   const [createRoom, setCreateRoom] = useState(false);
 

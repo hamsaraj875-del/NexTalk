@@ -3,10 +3,9 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 //react icons
-import { CiChat2 } from "react-icons/ci";
 import { MdOutlineGroup } from "react-icons/md";
 import { IoNotificationsOutline, IoSettingsOutline } from "react-icons/io5";
-import { GoDotFill } from "react-icons/go";
+import { FaSearchengin } from "react-icons/fa6";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { MdLogout } from "react-icons/md";
 
@@ -25,13 +24,14 @@ const Sidebar = ({
   const navigate = useNavigate();
   
   const list = [
-    { icon: CiChat2, name: "Chats" },
+    { icon: FaSearchengin, name: "Search" },
     { icon: MdOutlineGroup, name: "Friends" },
     { icon: IoNotificationsOutline, name: "Notifications" },
     { icon: IoSettingsOutline, name: "Settings" },
+    {icon:MdLogout,name:"Logout"},
   ];
   const [open, setOpen] = useState(true);
-  const [tab, setTab] = useState("Chats");
+  const [tab, setTab] = useState("Search");
   const [message,setMessage] = useState("");
   const [confirm, setConfirm] = useState(false);
 
@@ -136,22 +136,16 @@ const Sidebar = ({
                   }}
                   key={name}
                   className={`rounded-lg 
-                  ${tab === name ? "bg-[#3a19a4] group" : "hover:bg-[#120833]"} w-full h-12 flex justify-start px-2 items-center transform duration-300 cursor-pointer`}
+                  ${tab === name ? "bg-[#3a19a4] group" : "hover:bg-[#120833]"} ${name=="Logout"?'hover:bg-red-950/40':''} w-full h-12 flex justify-start px-2 items-center transform duration-300 cursor-pointer`}
                 >
                   <Icon
-                    className={`mr-1 ${tab === name ? "text-yellow-400" : ""}`}
+                    className={`mr-1 ${name=="Logout"?'group-hover:text-red-400':''} ${tab === name ? "text-yellow-400" : ""}`}
                   />
-                  <p>{name}</p>
+                  <p className={name=="Logout"?'group-hover:text-red-400':''}>{name}</p>
                 </div>
               );
             })}
-            <button
-              onClick={confirmLogout}
-              className="hover:bg-[#1d0303] text-red-300 rounded-lg w-full h-12 flex justify-start px-2 items-center transform duration-300 cursor-pointer"
-            >
-              <MdLogout className="mr-1" />
-              <p>Logout</p>
-            </button>
+            
           </div>
           <div className="w-full p-6 bg-black border-r border-gray-800">
             <div className="flex items-center gap-3 p-2 border border-gray-700

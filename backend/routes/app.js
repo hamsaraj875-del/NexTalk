@@ -14,6 +14,7 @@ dotenv.config();
 //Internal modules
 
 const login = require("./login");
+const roomRoute = require("./roomRoute");
 const Port = process.env.PORT || 3000;
 const Db = process.env.DB;
 const controller = require("../controller/controller");
@@ -54,6 +55,7 @@ app.use(
 
 app.use(express.json());
 app.use("/auth", login);
+app.use("/chat/room",roomRoute);
 
 //auth controller for is user logged in or not
 

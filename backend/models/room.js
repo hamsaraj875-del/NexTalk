@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
 
-const schema = new mongoose.schema({
+const schema = new mongoose.Schema({
   name:{type:String,required:true},
-  description:{type:String,default:""},
+  description:{type:String},
   password:{type:String,required:true},
   type:{type:String,required:true},
-  creator:{type:mongoose.Schema.Types.ObjectId,required:true},
+  owner:{type:mongoose.Schema.Types.ObjectId,required:true},
 });
 
-module.exports = mongoose.model(schema,rooms);
+module.exports = mongoose.model("rooms",schema);
