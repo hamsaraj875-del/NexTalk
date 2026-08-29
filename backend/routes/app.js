@@ -19,6 +19,7 @@ const Port = process.env.PORT || 3000;
 const Db = process.env.DB;
 const controller = require("../controller/controller");
 const socket = require("../utils/socket");
+const {user} = require("../utils/security");
 
 //Session handling
 
@@ -59,18 +60,6 @@ app.use("/chat/room",roomRoute);
 
 //auth controller for is user logged in or not
 
-const user = (req, res, next) => {
-  if (req.session.isLoggedIn) {
-    next();
-  } else {
-    return res.status(201).json({
-      success: false,
-      unauthorised:true,
-      message: "User not found please log in first!",
-    });
-  }
-};
-
 
 app.post("/auth/authenticate",controller.authenticate);
 app.post("/search",user,controller.searchUsers);
@@ -89,3 +78,6 @@ mongoose.connect(Db).then(() => {
     console.log(`Server is running in the http://localhost:${3000}`);
   });
 });
+
+
+module.exports = user;

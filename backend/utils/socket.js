@@ -76,7 +76,8 @@ server = async (server) => {
     socket.on("joinRoom",(roomId,userId)=>{
       socket.join(roomId);
       onlineGroupUser.set(userId,roomId);
-      
+      io.emit("onlineGroupUser",[...onlineGroupUser.keys()]);
+       
     });
 
     socket.on("roomMessage",(roomId,userId,message)=>{

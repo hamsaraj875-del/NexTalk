@@ -1,257 +1,186 @@
-// internal modules
+//external modules
+import { useState, useEffect } from "react";
+import socket from "../private/socket";
 
-import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
-import { FiUsers } from "react-icons/fi";
+//react icons
+import { BsFillSendFill } from "react-icons/bs";
+import { FaPlus } from "react-icons/fa6";
+import { IoArrowBackOutline } from "react-icons/io5";
 
-import socket from "./socket";
+//internal modules
+import Loader from "../common/Loader";
 
-const RoomMessage = ({ setRoomSidebar }) => {
-  const { roomId } = useParams();
-
+const RoomMessage = ({ userDetails, friend, setFriend, onlineUser }) => {
   const [message, setMessage] = useState("");
   const [data, setData] = useState([]);
+  const [loader, setLoader] = useState(false);
 
-  const messageContainerRef = useRef(null);
-
-  // Join room
   useEffect(() => {
-    socket.connect();
-
-    const joinRoom = () => {
-      console.log("Connected:", socket.id);
-      console.log("Joining room:", roomId);
-
-      socket.emit("joinRoom", roomId);
+    const controller = new AbortController();
+    const signal = controller.signal;
+    setLoader(true);
+    const fetcher = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_LINK}/messages`, {
+          signal,
+          method: "POST",
+          credentials: "include",
+        });
+        const result = await response.json();
+        if (result.success) {
+          setData(result.message);
+        }
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLoader(false);
+      }
     };
-
-    if (socket.connected) {
-      joinRoom();
-    } else {
-      socket.once("connect", joinRoom);
-    }
-
+    fetcher();
     return () => {
-      socket.off("connect", joinRoom);
-      socket.disconnect();
-    };
-  }, [roomId]);
-
-  // Receive room messages
-  useEffect(() => {
-    const receiveMessage = (msg) => {
-      setData((prev) => [...prev, msg]);
-    };
-
-    socket.on("roomMessage", receiveMessage);
-
-    return () => {
-      socket.off("roomMessage", receiveMessage);
+      controller.abort();
     };
   }, []);
 
-  // Auto scroll
   useEffect(() => {
-    if (messageContainerRef.current) {
-      messageContainerRef.current.scrollTop =
-        messageContainerRef.current.scrollHeight;
+    socket.on("message", (senderId, friendId, msg, time) => {
+      setData((prevData) => [
+        ...prevData,
+        {
+          senderId: senderId,
+          receiverId: friendId,
+          message: msg,
+          time: time,
+        },
+      ]);
+    });
+
+    return () => {
+      socket.off("message");
+    };
+  }, []);
+
+  const messageSend = () => {
+    if (message.length == 0) {
+      console.log("empty");
+      return;
     }
-  }, [data]);
+    socket.emit("message", {
+      receiverId: friend.id,
+      senderId: userDetails.userId,
+      message,
+    });
 
-  const sendMessage = () => {
-    const trimmedMessage = message.trim();
+    const time = new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
 
-    if (!trimmedMessage) return;
-
-    socket.emit("roomMessage", roomId, trimmedMessage);
+    setData([
+      ...data,
+      {
+        senderId: userDetails.userId,
+        receiverId: friend.id,
+        message: message,
+        time: time,
+      },
+    ]);
 
     setMessage("");
   };
 
   return (
-    <div className="w-full h-full flex flex-col bg-[#090912] text-white">
-
-      {/* Header */}
-      <div className="h-20 shrink-0 px-4 sm:px-6 flex items-center justify-between border-b border-white/10">
-
-        <div className="flex items-center min-w-0">
-
-          {/* Group avatar */}
-          <div
-            className="
-              w-11 h-11 sm:w-12 sm:h-12
-              shrink-0
-              rounded-full
-              bg-gradient-to-br from-purple-600 to-indigo-600
-              flex items-center justify-center
-              text-lg font-semibold
-            "
-          >
-            G
+    <>
+      {!friend ? (
+        <div className="w-full h-full flex flex-col">
+          <div className="w-full] h-[100%] bg-gray-950 flex items-center justify-center overflow-hidden">
+            <img
+              src="/messageLogo.png"
+              alt="Welcome"
+              className="w-full h-full object-contain"
+            />
           </div>
-
-          <div className="ml-3 sm:ml-4 min-w-0">
-            <h2 className="text-base sm:text-lg font-semibold truncate">
-              Group Name
-            </h2>
-
-            <p className="text-xs sm:text-sm text-gray-400">
-              5 members
-            </p>
-          </div>
-
         </div>
-
-        {/* Members button */}
-        <button
-          type="button"
-          onClick={() => setRoomSidebar(true)}
-          className="
-            md:hidden
-            shrink-0
-            ml-3
-            p-2.5
-            rounded-lg
-            text-gray-400
-            hover:text-white
-            hover:bg-white/10
-            transition
-            cursor-pointer
-          "
+      ) : (
+        <div
+          className="w-full h-full bg-cover flex flex-col"
+          style={{
+            backgroundImage: "url('/chatBackground.png')",
+          }}
         >
-          <FiUsers size={21} />
-        </button>
-
-      </div>
-
-      {/* Messages */}
-      <div
-        ref={messageContainerRef}
-        className="
-          flex-1
-          min-h-0
-          overflow-y-auto
-          scrollbar-none
-          px-4 sm:px-6
-          py-5
-        "
-      >
-
-        {data.length === 0 ? (
-          <div className="h-full flex items-center justify-center text-gray-500">
-            No messages yet
+          <div className="w-full  h-[8%] flex justify-between px-6 items-center bg-black border-b border-gray-800">
+            <div className="flex  justify-center items-center">
+              <IoArrowBackOutline
+                className="mr-2 cursor-pointer"
+                onClick={() => setFriend(null)}
+              />
+              <p className="text-xl">{friend.name}</p>
+            </div>
+            <div
+              className={`${onlineUser.includes(friend.id) ? "text-green-400" : "text-red-400 animate-pulse"} flex justify-center items-center gap-1 `}
+            >
+              {onlineUser.includes(friend.id) && (
+                <span className="w-2 h-2 rounded-full bg-green-500"></span>
+              )}
+              {onlineUser.includes(friend.id) ? "Online" : "Offline"}
+            </div>
           </div>
-        ) : (
-          <div className="flex flex-col gap-3">
-
-            {data.map((msg, index) => {
-
-              // Change this according to your actual logged-in user ID
-              const isMine = msg.userId === "currentUserId";
-
-              return (
-                <div
-                  key={index}
-                  className={`flex ${
-                    isMine ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  <div
-                    className={`
-                      max-w-[75%]
-                      sm:max-w-[65%]
-                      rounded-2xl
-                      px-4 py-2.5
-                      ${
-                        isMine
-                          ? "bg-purple-600 rounded-br-md"
-                          : "bg-[#151522] border border-white/10 rounded-bl-md"
-                      }
-                    `}
-                  >
-
-                    {/* Sender */}
-                    {!isMine && (
-                      <p className="text-xs text-purple-400 mb-1">
-                        {msg.userName || msg.userId}
+          <div className="w-full flex-1 min-h-0 flex bg-cover bg-center ">
+            {loader ? (
+              <Loader />
+            ) : (
+              <div className="w-full h-full overflow-y-scroll scrollbar-none flex flex-col gap-4 px-6 py-6">
+                {data
+                  .filter(
+                    (msg) =>
+                      msg.receiverId === friend.id ||
+                      msg.senderId === friend.id,
+                  )
+                  .map(({ senderId, receiverId, message, time }) => (
+                    <div
+                      className={`${senderId == userDetails.userId ? "right-1 bg-gradient-to-r from-indigo-800 to-indigo-700 self-end rounded-t-2xl rounded-l-2xl" : "left-1 bg-gray-900 self-start rounded-r-2xl rounded-t-2xl"} max-w-140 px-4 py-2 flex flex-col `}
+                    >
+                      <p className="text-white-400 text-[16px]">  
+                        {message}
                       </p>
-                    )}
-
-                    {/* Message */}
-                    <p className="text-sm sm:text-base break-words">
-                      {msg.message}
-                    </p>
-
-                    {/* Time */}
-                    {msg.time && (
-                      <p className="text-[10px] text-gray-400 mt-1 text-right">
-                        {msg.time}
+                      <p className="text-xs text-gray-400 right-1 self-end">
+                        {time}
                       </p>
-                    )}
-
-                  </div>
-                </div>
-              );
-            })}
-
+                    </div>
+                  ))}
+              </div>
+            )}
           </div>
-        )}
-
-      </div>
-
-      {/* Input */}
-      <div className="shrink-0 px-3 sm:px-5 py-3 sm:py-4 border-t border-white/10">
-
-        <div className="flex items-center gap-2 sm:gap-3">
-
-          <input
-            type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                sendMessage();
-              }
-            }}
-            placeholder="Type a message..."
-            className="
-              flex-1
-              min-w-0
-              bg-[#151522]
-              border border-white/10
-              rounded-xl
-              px-4
-              py-3
-              text-sm sm:text-base
-              outline-none
-              focus:border-purple-500
-              transition
-            "
-          />
-
-          <button
-            type="button"
-            onClick={sendMessage}
-            className="
-              shrink-0
-              px-4 sm:px-5
-              py-3
-              rounded-xl
-              bg-purple-600
-              hover:bg-purple-700
-              transition
-              cursor-pointer
-              text-sm sm:text-base
-            "
-          >
-            Send
-          </button>
-
+          <div className="w-full h-26 px-6 py-2">
+            <div className=" h-15 px-4 py-2 bg-black border border-gray-800 rounded-2xl flex justify-center items-center">
+              <FaPlus
+                size={25}
+                className=" cursor-pointer mr-4 text-gray-400 hover:text-white"
+              />
+              <input
+                value={message}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    messageSend();
+                  }
+                }}
+                onChange={(e) => setMessage(e.target.value)}
+                className="w-full h-full placeholder-gray-700 outline-0"
+                placeholder="Messages"
+              ></input>
+              <button>
+                <BsFillSendFill
+                  onClick={messageSend}
+                  size={25}
+                  className="text-gray-400 cursor-pointer hover:text-white ml-4"
+                />
+              </button>
+            </div>
+          </div>
         </div>
-
-      </div>
-
-    </div>
+      )}
+    </>
   );
 };
 

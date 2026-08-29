@@ -14,6 +14,7 @@ import Confirmation from "../common/Confirmation";
 
 const Sidebar = ({
   setCreateRoom,
+  setJoinRoom,
   setUserDetails,
   userDetails,
   selectTab,
@@ -124,7 +125,7 @@ const Sidebar = ({
               <button onClick={()=>setCreateRoom(true)} className="bg-[#5725f8] h-10 w-full flex justify-center cursor-pointer items-center rounded-lg">
                 <p className="font-bold text-sm">Create Room</p>
               </button>
-              <button className="bg-transparent border border-gray-700 hover:border-indigo-700 hover:bg-indigo-600/10 h-10 w-full flex justify-center cursor-pointer items-center rounded-lg">
+              <button onClick={()=>setJoinRoom(true)} className="bg-transparent border border-gray-700 hover:border-indigo-700 hover:bg-indigo-600/10 h-10 w-full flex justify-center cursor-pointer items-center rounded-lg">
                 <p className="font-bold text-sm">Join Room</p>
               </button>
             {list.map(({ icon: Icon, name }) => {
@@ -133,6 +134,9 @@ const Sidebar = ({
                   onClick={() => {
                     setTab(name);
                     selectTab(name);
+                    if(name=="Logout"){
+                      confirmLogout()
+                    }
                   }}
                   key={name}
                   className={`rounded-lg 
@@ -195,6 +199,9 @@ const Sidebar = ({
                 onClick={() => {
                   setTab(name);
                   selectTab(name);
+                  if(name=="Logout"){
+                    confirmLogout()
+                  }
                 }}
                 className={`
                   ${tab === name ? "bg-[#5d31ef]" : "hover:bg-[#120428"}

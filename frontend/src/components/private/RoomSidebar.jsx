@@ -1,68 +1,109 @@
-const RoomSidebar = ({ groupList }) => {
+const RoomSidebar = ({ groupList, setGroupList, roomData }) => {
   const avatarColors = {
-    A: "bg-[#155E75]", // Dark Cyan
-    B: "bg-[#1E40AF]", // Dark Blue
-    C: "bg-[#5B21B6]", // Dark Violet
-    D: "bg-[#9D174D]", // Dark Pink
-    E: "bg-[#9A3412]", // Dark Orange
-    F: "bg-[#0F766E]", // Dark Teal
-    G: "bg-[#166534]", // Dark Green
-    H: "bg-[#4338CA]", // Indigo
-    I: "bg-[#6B21A8]", // Dark Purple
-    J: "bg-[#BE123C]", // Dark Rose
-    K: "bg-[#0369A1]", // Deep Sky Blue
-    L: "bg-[#4D7C0F]", // Dark Lime
-    M: "bg-[#86198F]", // Dark Magenta
-    N: "bg-[#6D28D9]", // Purple
-    O: "bg-[#B45309]", // Dark Amber
-    P: "bg-[#1D4ED8]", // Royal Blue
-    Q: "bg-[#9D174D]", // Berry
-    R: "bg-[#7E22CE]", // Deep Purple
-    S: "bg-[#0E7490]", // Cyan
-    T: "bg-[#047857]", // Emerald
-    U: "bg-[#BE123C]", // Crimson
-    V: "bg-[#C2410C]", // Burnt Orange
-    W: "bg-[#3730A3]", // Deep Indigo
-    X: "bg-[#0E7490]", // Teal
-    Y: "bg-[#86198F]", // Magenta
-    Z: "bg-[#15803D]", // Green
+    A: "bg-[#155E75]",
+    B: "bg-[#1E40AF]",
+    C: "bg-[#5B21B6]",
+    D: "bg-[#9D174D]",
+    E: "bg-[#9A3412]",
+    F: "bg-[#0F766E]",
+    G: "bg-[#166534]",
+    H: "bg-[#4338CA]",
+    I: "bg-[#6B21A8]",
+    J: "bg-[#BE123C]",
+    K: "bg-[#0369A1]",
+    L: "bg-[#4D7C0F]",
+    M: "bg-[#86198F]",
+    N: "bg-[#6D28D9]",
+    O: "bg-[#B45309]",
+    P: "bg-[#1D4ED8]",
+    Q: "bg-[#9D174D]",
+    R: "bg-[#7E22CE]",
+    S: "bg-[#0E7490]",
+    T: "bg-[#047857]",
+    U: "bg-[#BE123C]",
+    V: "bg-[#C2410C]",
+    W: "bg-[#3730A3]",
+    X: "bg-[#0E7490]",
+    Y: "bg-[#86198F]",
+    Z: "bg-[#15803D]",
   };
+
   return (
-    <>
-      {groupList.length != 0 ? (
-        <div className="flex-1 overflow-y-auto scrollbar-none p-3 space-y-2">
-          {friendsList.map(({ name, id }) => (
+    <div className="flex flex-col h-full p-3">
+      <div className="mb-4 pb-3 border-b border-white/10">
+        <h1 className="text-xl font-bold text-white">
+          Nex<span className="text-purple-500">Talk</span>
+        </h1>
+
+        <p className="text-xs text-gray-400 mt-1">Room Members</p>
+      </div>
+      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#11111b] p-5 shadow-xl">
+        <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-purple-600/20 blur-3xl" />
+        <div className="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-blue-600/20 blur-3xl" />
+
+        <div className="relative mb-5 flex items-center gap-4">
+
+          <div>
+            <h2 className="text-xl font-bold text-white">{roomData.name}</h2>
+          </div>
+        </div>
+
+        <div className="relative space-y-4">
+          <div className="rounded-xl border flex items-center justify-evenly border-purple-500/10 bg-purple-500/10 p-3">
+            <p className="text-xs font-medium text-purple-400">ROOM TYPE</p>
+
+            <p className="mt-1 font-medium text-white">{roomData.type}</p>
+          </div>
+
+          <div className="rounded-xl border border-blue-500/10 bg-blue-500/10 p-3">
+            <p className="text-xs font-medium text-blue-400">DESCRIPTION</p>
+
+            <p className="mt-1 text-sm leading-relaxed text-gray-300">
+              {roomData.description || "No description available"}
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-pink-500/10 flex items-center justify-evenly bg-pink-500/10 p-3">
+            <p className="text-xs font-medium text-pink-400">OWNER</p>
+
+            <div className="mt-2 flex items-center gap-3">
+              <p className="font-medium text-white">{roomData.ownerName}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      {groupList.length !== 0 ? (
+        <div className="flex flex-col overflow-y-auto scrollbar-none space-y-2">
+          {groupList.map(({ name, id }) => (
             <div
               key={id}
-              className={`
-    group flex items-center gap-3 p-3 rounded-xl cursor-pointer
-    transition-all duration-300
-  bg-gradient-to-r from-indigo-950/70 to-indigo-950 border border-indigo-600/60 shadow-md shadow-indigo-900/30"
-        : "border hover:bg-gradient-to-r hover:from-indigo-950/50 hover:to-indigo-950/80 hover:border-indigo-800/30"
-  `}
+              className="group flex items-center gap-3 p-3 rounded-xl cursor-pointer
+              transition-all duration-300
+              bg-gradient-to-r from-indigo-950/70 to-indigo-950
+              border border-indigo-600/60
+              shadow-md shadow-indigo-900/30"
             >
-              <div className="relative">
-                <div
-                  className={`${avatarColors[name.charAt(0).toUpperCase()]} text-center flex rounded-xl w-10 h-10 font-bold items-center justify-center`}
-                >
-                  {name.charAt(0).toUpperCase()}
-                </div>
+              <div
+                className={`${avatarColors[name.charAt(0).toUpperCase()]}
+                text-center flex rounded-xl w-10 h-10 font-bold
+                items-center justify-center text-white`}
+              >
+                {name.charAt(0).toUpperCase()}
               </div>
 
               <div className="flex-1 overflow-hidden">
-                <div className="flex justify-between items-center">
-                  <h2 className="font-semibold text-white ">{name}</h2>
-                </div>
+                <h2 className="font-semibold text-white">{name}</h2>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="w-full h-full flex flex-col items-center justify-start text-center text-gray-500">
-          <p className="h-fit w-fit mt-24">No one joined yet !</p>
+        <div className="flex flex-1 items-center justify-center text-center text-gray-500">
+          <p>No one joined yet!</p>
         </div>
       )}
-    </>
+    </div>
   );
 };
+
 export default RoomSidebar;

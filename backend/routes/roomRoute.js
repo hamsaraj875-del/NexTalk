@@ -4,22 +4,13 @@ const express = require("express");
 const roomRoute = express.Router();
 
 //internal modules
-
-
-//room protector 
-const protector = (req,res,next)=>{
-  if(req.session.roomId == req.params.roomId){
-    next();
-  }
-  return res.status(500).json({
-    success:false,
-    message:"unauthorized access",
-  })
-}
+const {user,protector} = require("../utils/security");
 
 const roomController = require("../controller/roomController");
 
-roomRoute.post("/",roomController.createRoom);
-roomRoute.get("/:roomId",protector,roomController.joinRoom);
+roomRoute.post("/",user,roomController.createRoom);
+roomRoute.get("/search",user,roomController.roomSearch);
+roomRoute.get("/:roomId",user,protector,roomController.joinRoom);
+roomRoute.post("/auth/roomAuthenticate",user,protector,roomController.roomDetails);
 
 module.exports = roomRoute;

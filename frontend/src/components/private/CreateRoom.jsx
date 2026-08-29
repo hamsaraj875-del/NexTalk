@@ -26,9 +26,8 @@ const CreateRoom = ({ setCreateRoom }) => {
   const roomCreator = async (e) => {
     setLoader(true);
     e.preventDefault();
-    console.log(form);
     try {
-      const response = await fetch(`${import.meta.env.VITE_LINK}/room`, {
+      const response = await fetch(`${import.meta.env.VITE_LINK}/chat/room`, {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         method: "POST",
