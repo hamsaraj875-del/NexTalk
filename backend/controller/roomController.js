@@ -4,6 +4,8 @@ const { check, validationResult } = require("express-validator");
 
 //internal modules
 const room = require("../models/room");
+const roomMessage = require("../models/roomMessages");
+const database = require("../models/database");
 
 //room creation
 
@@ -30,15 +32,21 @@ exports.createRoom = [
         message: formattedError,
       });
     }
-    console.log(req.body);
     const { name, password: pass, description, type } = req.body;
     try {
-      const password = await bcrypt.hash(pass, 12);
+      let passoword = "";
+      if(type=="private"){
+        password = await bcrypt.hash(pass,12);
+      }else{
+        password = "none";
+      }
       const owner = req.session.userId;
-      const details = new room({ name, password, description, type, owner });
+      const ownerName = req.session.userName;
+      const details = new room({ name, password, description, type, owner,ownerName });
       await details.save();
       req.session.roomId = details._id;
       await req.session.save();
+      req.session.rooms = [...req.session.rooms,details._id];
       return res.status(200).json({
         success: true,
         message: "Room named " + name + "created successfully",
@@ -56,11 +64,11 @@ exports.createRoom = [
 
 //room primary details
 exports.roomDetails = async (req, res, next) => {
-  const roomId = req.body();
+  const {roomId} = req.body;
   try {
     const roomDetails = await room
       .findById(roomId)
-      .select("name description type owner");
+      .select("name description type owner ownerName");
     if (roomDetails) {
       return res.status(200).json({
         success: true,
@@ -84,6 +92,7 @@ exports.roomDetails = async (req, res, next) => {
 //room searching
 exports.roomSearch = async (req, res, next) => {
   const { name } = req.query;
+  console.log(name);
   try {
     const l = await room
       .find({ name: { $regex: name, $options: "i" } })
@@ -102,4 +111,87 @@ exports.roomSearch = async (req, res, next) => {
   }
 };
 
-exports.joinRoom = (req, res, next) => {};
+exports.joinRoom = async(req, res, next) => {
+  const group = req.body;
+  const data = await room.findById(group._id);
+  if(data.type=="private"){
+    if(group.password && data){
+      const comp = await bcrypt.compare(group.password,data.password);
+      if(comp){
+        req.session.rooms = [...req.session.rooms || [],data._id];
+        return res.status(200).json({
+          success:true,
+          roomId:data._id,
+        })
+      }else{
+        return res.status(500).json({
+          success:false,
+          message:"invalid password",
+        })
+      }
+    }else{
+      return res.status(200).json({
+        success:false,
+        message:"invalid password",
+      })
+    }
+  }else{
+    if(data){
+      return res.status(200).json({
+        success:true,
+        roomId:data._id,
+      })
+    }else{
+      return res.status(500).json({
+        success:false,
+        message:"invalid room",
+      })
+    }
+  }
+};
+
+
+//room existing messages
+exports.roomMessage = async(req,res,next)=>{
+  const roomId = req.query;
+  try{
+    const roomData = await room.findById(roomId);
+    if(roomData && roomId.includes(req.session.rooms)){
+      const roomMessages = await roomMessage.find({roomId:roomData._id});
+      return res.status(200).json({
+        success:true,
+        message:roomMessages,
+      })
+    }else{
+      return res.status(500).json({
+        success:false,
+        message:"unauthorised access",
+      })
+    }
+  }catch(err){
+    console.log(err);
+    return res.status(500).json({
+      success:false,
+      message:"Internal server error",
+    })
+  }
+}
+
+
+
+//user details
+exports.userDetails=(req,res,next)=>{
+  try{
+    const userId = req.session.userId;
+    const userName = req.session.userName;
+    return res.status(200).json({
+      success:true,
+      message:{userId,userName},
+    })
+  }catch(err){
+    return res.status(500).json({
+      success:false,
+      message:"not found",
+    })
+  }
+}

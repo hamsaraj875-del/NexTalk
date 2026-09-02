@@ -75,13 +75,14 @@ server = async (server) => {
 
     socket.on("joinRoom",(roomId,userId)=>{
       socket.join(roomId);
-      onlineGroupUser.set(userId,roomId);
+      onlineGroupUser.set(roomId);
+      
+      console.log("online group users are :",onlineGroupUser.keys());
       io.emit("onlineGroupUser",[...onlineGroupUser.keys()]);
-       
     });
 
     socket.on("roomMessage",(roomId,userId,message)=>{
-      io.to(socket.id).emit("roomMessage",message);
+      io.to(roomId).emit("roomMessage",message);
     })
 
     socket.on("disconnect", () => {

@@ -25,6 +25,9 @@ const CreateRoom = ({ setCreateRoom }) => {
 
   const roomCreator = async (e) => {
     setLoader(true);
+    if(form.type=="public"){
+      setForm({...form,password:""})
+    }
     e.preventDefault();
     try {
       const response = await fetch(`${import.meta.env.VITE_LINK}/chat/room`, {
@@ -37,7 +40,7 @@ const CreateRoom = ({ setCreateRoom }) => {
       console.log(result);
       setLoader(false);
       if (result.success) {
-        navigate(`room/${result.roomId}`);
+        navigate(`chat/room/${result.roomId}`);
       } else {
         setErr(result.message);
       }
@@ -52,6 +55,7 @@ const CreateRoom = ({ setCreateRoom }) => {
 
   return (
     <>
+    <MainLoader />
       <div className="fixed inset-0  z-50  items-center justify-center bg-black/50 backdrop-blur-md">
         <div className="flex w-full h-full justify-center items-center">
           <form

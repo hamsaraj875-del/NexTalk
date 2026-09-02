@@ -44,30 +44,30 @@ const RoomSidebar = ({ groupList, setGroupList, roomData }) => {
         <div className="relative mb-5 flex items-center gap-4">
 
           <div>
-            <h2 className="text-xl font-bold text-white">{roomData.name}</h2>
+            <h2 className="text-xl font-bold text-white">{roomData?.name?.toUpperCase()}</h2>
           </div>
         </div>
 
         <div className="relative space-y-4">
           <div className="rounded-xl border flex items-center justify-evenly border-purple-500/10 bg-purple-500/10 p-3">
-            <p className="text-xs font-medium text-purple-400">ROOM TYPE</p>
+            <p className="text-xs font-medium text-purple-400">ROOM TYPE :</p>
 
-            <p className="mt-1 font-medium text-white">{roomData.type}</p>
+            <p className="text-xs font-medium text-purple-400">{roomData?.type?.toUpperCase()}</p>
           </div>
 
-          <div className="rounded-xl border border-blue-500/10 bg-blue-500/10 p-3">
-            <p className="text-xs font-medium text-blue-400">DESCRIPTION</p>
+          <div className="rounded-xl border flex items-center justify-evenly text-blue-400 border-blue-500/10 bg-blue-500/10 p-3">
+            <p className="text-xs font-medium ">DESCRIPTION :</p>
 
-            <p className="mt-1 text-sm leading-relaxed text-gray-300">
-              {roomData.description || "No description available"}
+            <p className="text-xs leading-relaxed text-blue-500">
+              {roomData?.description?.toUpperCase() || "No description available"}
             </p>
           </div>
 
           <div className="rounded-xl border border-pink-500/10 flex items-center justify-evenly bg-pink-500/10 p-3">
-            <p className="text-xs font-medium text-pink-400">OWNER</p>
+            <p className="text-xs font-medium text-pink-400">OWNER :</p>
 
-            <div className="mt-2 flex items-center gap-3">
-              <p className="font-medium text-white">{roomData.ownerName}</p>
+            <div className="flex items-center gap-3">
+              <p className="font-medium text-pink-400">{roomData?.ownerName?.toUpperCase()}</p>
             </div>
           </div>
         </div>
