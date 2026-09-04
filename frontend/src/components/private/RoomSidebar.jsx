@@ -1,4 +1,4 @@
-const RoomSidebar = ({ groupList, setGroupList, roomData }) => {
+const RoomSidebar = ({ groupList, roomData }) => {
   const avatarColors = {
     A: "bg-[#155E75]",
     B: "bg-[#1E40AF]",
@@ -27,6 +27,8 @@ const RoomSidebar = ({ groupList, setGroupList, roomData }) => {
     Y: "bg-[#86198F]",
     Z: "bg-[#15803D]",
   };
+
+  
 
   return (
     <div className="flex flex-col h-full p-3">

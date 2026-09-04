@@ -42,11 +42,10 @@ exports.createRoom = [
       }
       const owner = req.session.userId;
       const ownerName = req.session.userName;
-      const details = new room({ name, password, description, type, owner,ownerName });
+      const details = new room({ name, password, description, type, owner,ownerName,users:[owner] });
       await details.save();
       req.session.roomId = details._id;
       await req.session.save();
-      req.session.rooms = [...req.session.rooms,details._id];
       return res.status(200).json({
         success: true,
         message: "Room named " + name + "created successfully",
@@ -118,7 +117,8 @@ exports.joinRoom = async(req, res, next) => {
     if(group.password && data){
       const comp = await bcrypt.compare(group.password,data.password);
       if(comp){
-        req.session.rooms = [...req.session.rooms || [],data._id];
+        data.users.push(req.session.userId);
+        await data.save();
         return res.status(200).json({
           success:true,
           roomId:data._id,
@@ -137,6 +137,8 @@ exports.joinRoom = async(req, res, next) => {
     }
   }else{
     if(data){
+      data.users.push(req.session.userId);
+      await data.save();
       return res.status(200).json({
         success:true,
         roomId:data._id,
@@ -153,10 +155,10 @@ exports.joinRoom = async(req, res, next) => {
 
 //room existing messages
 exports.roomMessage = async(req,res,next)=>{
-  const roomId = req.query;
+  const {roomId} = req.query;
   try{
     const roomData = await room.findById(roomId);
-    if(roomData && roomId.includes(req.session.rooms)){
+    if(roomData && roomData.users.includes(req.session.userId)){
       const roomMessages = await roomMessage.find({roomId:roomData._id});
       return res.status(200).json({
         success:true,

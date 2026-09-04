@@ -43,7 +43,7 @@ const ChatRoom = () => {
         );
         const result = await response.json();
         const result1 = await response1.json();
-        console.log(result);
+        console.log(result1);
         if (result1.success) {
           setUserData(result1.message);
         }
@@ -51,16 +51,21 @@ const ChatRoom = () => {
           navigate("../../");
         } else {
           setRoomData(result.message);
-          console.log(result.message);
           socket.connect();
-          socket.once("connect", () => {
+          if (socket.connected) {
             socket.emit("joinRoom", roomId, result.message.userId);
-          });
+          } else {
+            socket.connect();
+            socket.once("connect", () => {
+              socket.emit("joinRoom", roomId, result.message.userId);
+            });
+          }
         }
         setLoader(false);
 
-        socket.on("roomOnline", (data) => {
+        socket.on("onlineGroupUser", (data) => {
           setGroupList(data);
+          console.log(data);
         });
       } catch (err) {
         console.log(err);
@@ -87,7 +92,7 @@ const ChatRoom = () => {
       </div>
 
       <div className="flex-1 min-w-0 h-full">
-        <RoomMessage roomData={roomData} />
+        <RoomMessage userData={userData} roomData={roomData} roomId={roomId} />
       </div>
     </div>
   );

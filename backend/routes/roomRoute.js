@@ -12,7 +12,7 @@ roomRoute.post("/",user,roomController.createRoom);
 roomRoute.get("/search",user,roomController.roomSearch);
 roomRoute.post("/join",user,roomController.joinRoom);
 roomRoute.post("/auth/roomAuthenticate",user,roomController.roomDetails);
-roomRoute.post("/messages",user,protector,roomController.roomMessage);
+roomRoute.post("/messages",user,roomController.roomMessage);
 roomRoute.post("/userDetails",user,roomController.userDetails);
 
 module.exports = roomRoute;

@@ -5,11 +5,25 @@ const { Server } = require("socket.io");
 //internal modules
 
 const messages = require("../models/messages");
+const roomMessages = require("../models/roomMessages");
 const friends = require("../models/friends");
+const room = require("../models/room");
+const database = require("../models/database");
 
 let onlineUser = new Map();
 let onlineSocket = new Map();
 let onlineGroupUser = new Map();
+
+//Live time shower
+
+const timeSetter = () => {
+  const time = new Date().toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+  return time;
+};
 
 server = async (server) => {
   const io = new Server(server, {
@@ -23,7 +37,7 @@ server = async (server) => {
       onlineUser.set(userId, socket.id);
       onlineSocket.set(socket.id, userId);
 
-      io.emit("onlineUser",[...onlineUser.keys()])
+      io.emit("onlineUser", [...onlineUser.keys()]);
     });
 
     socket.on("message", async (data) => {
@@ -39,11 +53,7 @@ server = async (server) => {
         ],
       });
       if (connection && connection.status === "accepted") {
-        const time = new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true,
-        });
+        const time = timeSetter();
         if (recieverSocketId) {
           io.to(recieverSocketId).emit(
             "message",
@@ -73,17 +83,40 @@ server = async (server) => {
       }
     });
 
-    socket.on("joinRoom",(roomId,userId)=>{
+    socket.on("joinRoom", async (roomId, userId) => {
       socket.join(roomId);
-      onlineGroupUser.set(roomId);
-      
-      console.log("online group users are :",onlineGroupUser.keys());
-      io.emit("onlineGroupUser",[...onlineGroupUser.keys()]);
+      try {
+        const data = await room.findById(roomId);
+        if (data.users.includes(userId)) {
+          const userName = await database.findById(userId);
+          onlineGroupUser.set(userId, { roomId, userName: userName.name });
+          console.log("online group users are :", onlineGroupUser.keys());
+          io.to(roomId).emit("onlineGroupUser", [...onlineGroupUser.values()]);
+        }
+      } catch (err) {
+        console.log(err);
+      }
     });
 
-    socket.on("roomMessage",(roomId,userId,message)=>{
-      io.to(roomId).emit("roomMessage",message);
-    })
+    socket.on("roomMessage", async ({senderId, roomId, message}) => {
+      try {
+        console.log(message);
+        const data = await room.findById(roomId);
+        const groupUser = onlineGroupUser.get(senderId);
+        if(!groupUser.userName){
+          return;
+        }
+        if (data && data.users.includes(senderId)) {
+          const time = timeSetter();
+          const userName = groupUser.userName;
+          const details = new roomMessages({roomId,senderId,senderName,message,time});
+          await details.save();
+          socket.to(roomId).emit("roomMessage", senderId,senderName,message,time);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    });
 
     socket.on("disconnect", () => {
       for (const [userId, socketId] of onlineUser) {

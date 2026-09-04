@@ -40,7 +40,7 @@ const CreateRoom = ({ setCreateRoom }) => {
       console.log(result);
       setLoader(false);
       if (result.success) {
-        navigate(`chat/room/${result.roomId}`);
+        navigate(`/chat/room/${result.roomId}`);
       } else {
         setErr(result.message);
       }

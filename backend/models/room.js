@@ -7,7 +7,7 @@ const schema = new mongoose.Schema({
   type:{type:String,required:true},
   owner:{type:mongoose.Schema.Types.ObjectId,required:true},
   ownerName:{type:String,required:true},
-  users:{type:Array,required:true,default:[]},
+  users:[{type:mongoose.Schema.Types.ObjectId,required:true,ref:"database"}],
 });
 
 module.exports = mongoose.model("rooms",schema);
