@@ -16,6 +16,10 @@ const ChatRoom = () => {
   const [groupList, setGroupList] = useState([]);
   const [loader, setLoader] = useState(true);
 
+  const handleOnlineGroupUser = (data) => {
+    if (Array.isArray(data)) setGroupList(data);
+  };
+
   const navigate = useNavigate();
   useEffect(() => {
     const controller = new AbortController();
@@ -30,7 +34,7 @@ const ChatRoom = () => {
             method: "POST",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ roomId: roomId }),
+            body: JSON.stringify({roomId}),
           },
         );
         const response1 = await fetch(
@@ -43,7 +47,6 @@ const ChatRoom = () => {
         );
         const result = await response.json();
         const result1 = await response1.json();
-        console.log(result1);
         if (result1.success) {
           setUserData(result1.message);
         }
@@ -53,11 +56,11 @@ const ChatRoom = () => {
           setRoomData(result.message);
           socket.connect();
           if (socket.connected) {
-            socket.emit("joinRoom", roomId, result.message.userId);
+            socket.emit("joinRoom", roomId, result1.message.userId);
           } else {
             socket.connect();
             socket.once("connect", () => {
-              socket.emit("joinRoom", roomId, result.message.userId);
+              socket.emit("joinRoom", roomId, result1.message.userId);
             });
           }
         }
@@ -65,7 +68,6 @@ const ChatRoom = () => {
 
         socket.on("onlineGroupUser", (data) => {
           setGroupList(data);
-          console.log(data);
         });
       } catch (err) {
         console.log(err);
@@ -79,15 +81,20 @@ const ChatRoom = () => {
       }
     };
     fetcher();
+    return () => {
+    controller.abort();
+    socket.off("onlineGroupUser", handleOnlineGroupUser);
+    socket.emit("disconnectRoom", { roomId });
+    };
   }, []);
 
   return (
     <div className="w-full h-screen flex overflow-hidden bg-[#090912]">
       <div className="w-72 shrink-0 h-full border-r border-white/10">
         <RoomSidebar
+        userData = {userData}
           roomData={roomData}
           groupList={groupList}
-          setGroupList={setGroupList}
         />
       </div>
 

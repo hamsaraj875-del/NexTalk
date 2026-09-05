@@ -35,14 +35,22 @@ exports.createRoom = [
     const { name, password: pass, description, type } = req.body;
     try {
       let passoword = "";
-      if(type=="private"){
-        password = await bcrypt.hash(pass,12);
-      }else{
+      if (type == "private") {
+        password = await bcrypt.hash(pass, 12);
+      } else {
         password = "none";
       }
       const owner = req.session.userId;
       const ownerName = req.session.userName;
-      const details = new room({ name, password, description, type, owner,ownerName,users:[owner] });
+      const details = new room({
+        name,
+        password,
+        description,
+        type,
+        owner,
+        ownerName,
+        users: [owner],
+      });
       await details.save();
       req.session.roomId = details._id;
       await req.session.save();
@@ -63,7 +71,7 @@ exports.createRoom = [
 
 //room primary details
 exports.roomDetails = async (req, res, next) => {
-  const {roomId} = req.body;
+  const  {roomId}  = req.body;
   try {
     const roomDetails = await room
       .findById(roomId)
@@ -98,9 +106,9 @@ exports.roomSearch = async (req, res, next) => {
       .select("name description type owner");
 
     return res.status(200).json({
-      success:true,
-      message:l,
-    })
+      success: true,
+      message: l,
+    });
   } catch (err) {
     console.log(err);
     return res.status(500).json({
@@ -110,90 +118,89 @@ exports.roomSearch = async (req, res, next) => {
   }
 };
 
-exports.joinRoom = async(req, res, next) => {
+exports.joinRoom = async (req, res, next) => {
   const group = req.body;
   const data = await room.findById(group._id);
-  if(data.type=="private"){
-    if(group.password && data){
-      const comp = await bcrypt.compare(group.password,data.password);
-      if(comp){
-        data.users.push(req.session.userId);
-        await data.save();
+  if (data.type == "private") {
+    if (group.password && data) {
+      const comp = await bcrypt.compare(group.password, data.password);
+      if (comp) {
+        if (!data.users.includes(req.session.userId)) {
+          data.users.push(req.session.userId);
+          await data.save();
+        }
         return res.status(200).json({
-          success:true,
-          roomId:data._id,
-        })
-      }else{
+          success: true,
+          roomId: data._id,
+        });
+      } else {
         return res.status(500).json({
-          success:false,
-          message:"invalid password",
-        })
+          success: false,
+          message: "invalid password",
+        });
       }
-    }else{
+    } else {
       return res.status(200).json({
-        success:false,
-        message:"invalid password",
-      })
+        success: false,
+        message: "invalid password",
+      });
     }
-  }else{
-    if(data){
+  } else {
+    if (data) {
       data.users.push(req.session.userId);
       await data.save();
       return res.status(200).json({
-        success:true,
-        roomId:data._id,
-      })
-    }else{
+        success: true,
+        roomId: data._id,
+      });
+    } else {
       return res.status(500).json({
-        success:false,
-        message:"invalid room",
-      })
+        success: false,
+        message: "invalid room",
+      });
     }
   }
 };
 
-
 //room existing messages
-exports.roomMessage = async(req,res,next)=>{
-  const {roomId} = req.query;
-  try{
+exports.roomMessage = async (req, res, next) => {
+  const { roomId } = req.query;
+  try {
     const roomData = await room.findById(roomId);
-    if(roomData && roomData.users.includes(req.session.userId)){
-      const roomMessages = await roomMessage.find({roomId:roomData._id});
+    if (roomData && roomData.users.includes(req.session.userId)) {
+      const roomMessages = await roomMessage.find({ roomId: roomData._id });
       return res.status(200).json({
-        success:true,
-        message:roomMessages,
-      })
-    }else{
+        success: true,
+        message: roomMessages,
+      });
+    } else {
       return res.status(500).json({
-        success:false,
-        message:"unauthorised access",
-      })
+        success: false,
+        message: "unauthorised access",
+      });
     }
-  }catch(err){
+  } catch (err) {
     console.log(err);
     return res.status(500).json({
-      success:false,
-      message:"Internal server error",
-    })
+      success: false,
+      message: "Internal server error",
+    });
   }
-}
-
-
+};
 
 //user details
-exports.userDetails=(req,res,next)=>{
-  try{
+exports.userDetails = (req, res, next) => {
+  try {
     const userId = req.session.userId;
     const userName = req.session.userName;
     return res.status(200).json({
-      success:true,
-      message:{userId,userName},
-    })
-  }catch(err){
+      success: true,
+      message: { userId, userName },
+    });
+  } catch (err) {
     return res.status(500).json({
-      success:false,
-      message:"not found",
-    })
+      success: false,
+      message: "not found",
+    });
   }
-}
+};

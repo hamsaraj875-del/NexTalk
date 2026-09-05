@@ -23,25 +23,23 @@ const Sidebar = ({
   setNotify,
 }) => {
   const navigate = useNavigate();
-  
+
   const list = [
     { icon: FaSearchengin, name: "Search" },
     { icon: MdOutlineGroup, name: "Friends" },
     { icon: IoNotificationsOutline, name: "Notifications" },
     { icon: IoSettingsOutline, name: "Settings" },
-    {icon:MdLogout,name:"Logout"},
+    { icon: MdLogout, name: "Logout" },
   ];
   const [open, setOpen] = useState(true);
   const [tab, setTab] = useState("Search");
-  const [message,setMessage] = useState("");
+  const [message, setMessage] = useState("");
   const [confirm, setConfirm] = useState(false);
-
 
   const confirmLogout = () => {
     setMessage("Are you sure you want to log out ?");
     setConfirm(true);
   };
-  
 
   const fact = async (confirmation) => {
     setConfirm(false);
@@ -100,18 +98,15 @@ const Sidebar = ({
 
   return (
     <>
-      {confirm && (
-        <Confirmation
-          message={message}
-          fact={fact}
-        />
-      )}
+      {confirm && <Confirmation message={message} fact={fact} />}
       {open && (
         <>
           <div className="h-[90%] bg-black w-full flex flex-col gap-4 px-2 py-1 border-r border-gray-800">
             <div className="flex justify-between items-center w-full h-20 px-2">
               <div className="w-fit flex ">
-                <p className="bg-gradient-to-r from-purple-700 to-blue-700 font-mono font-bold bg-clip-text text-transparent text-3xl">NexTalk</p>
+                <p className="bg-gradient-to-r from-purple-700 to-blue-700 font-mono font-bold bg-clip-text text-transparent text-3xl">
+                  NexTalk
+                </p>
               </div>
               <button
                 className="cursor-pointer"
@@ -122,42 +117,57 @@ const Sidebar = ({
                 <IoIosArrowBack size={20} />
               </button>
             </div>
-              <button onClick={()=>setCreateRoom(true)} className="bg-[#5725f8] h-10 w-full flex justify-center cursor-pointer items-center rounded-lg">
-                <p className="font-bold text-sm">Create Room</p>
-              </button>
-              <button onClick={()=>setJoinRoom(true)} className="bg-transparent border border-gray-700 hover:border-indigo-700 hover:bg-indigo-600/10 h-10 w-full flex justify-center cursor-pointer items-center rounded-lg">
-                <p className="font-bold text-sm">Join Room</p>
-              </button>
+            <button
+              onClick={() => setCreateRoom(true)}
+              className="bg-[#5725f8] h-10 w-full flex justify-center cursor-pointer items-center rounded-lg"
+            >
+              <p className="font-bold text-sm">Create Room</p>
+            </button>
+            <button
+              onClick={() => setJoinRoom(true)}
+              className="bg-transparent border border-gray-700 hover:border-indigo-700 hover:bg-indigo-600/10 h-10 w-full flex justify-center cursor-pointer items-center rounded-lg"
+            >
+              <p className="font-bold text-sm">Join Room</p>
+            </button>
             {list.map(({ icon: Icon, name }) => {
               return (
                 <div
                   onClick={() => {
                     setTab(name);
                     selectTab(name);
-                    if(name=="Logout"){
-                      confirmLogout()
+                    if (name == "Logout") {
+                      confirmLogout();
                     }
                   }}
                   key={name}
                   className={`rounded-lg 
-                  ${tab === name ? "bg-[#3a19a4] group" : "hover:bg-[#120833]"} ${name=="Logout"?'hover:bg-red-950/40':''} w-full h-12 flex justify-start px-2 items-center transform duration-300 cursor-pointer`}
+                  ${tab === name ? "bg-[#3a19a4] group" : "hover:bg-[#120833]"} ${name == "Logout" ? "hover:bg-red-950/40" : ""} w-full h-12 flex justify-start px-2 items-center transform duration-300 cursor-pointer`}
                 >
                   <Icon
-                    className={`mr-1 ${name=="Logout"?'group-hover:text-red-400':''} ${tab === name ? "text-yellow-400" : ""}`}
+                    className={`mr-1 ${name == "Logout" ? "group-hover:text-red-400" : ""} ${tab === name ? "text-yellow-400" : ""}`}
                   />
-                  <p className={name=="Logout"?'group-hover:text-red-400':''}>{name}</p>
+                  <p
+                    className={
+                      name == "Logout" ? "group-hover:text-red-400" : ""
+                    }
+                  >
+                    {name}
+                  </p>
                 </div>
               );
             })}
-            
           </div>
           <div className="w-full p-6 bg-black border-r border-gray-800">
-            <div className="flex items-center gap-3 p-2 border border-gray-700
-                     hover:border-indigo-700 hover:bg-[#120d20] rounded-xl transition-all duration-300">
+            <div
+              className="flex items-center gap-3 p-2 border border-gray-700
+                     hover:border-indigo-700 hover:bg-[#120d20] rounded-xl transition-all duration-300"
+            >
               <div
                 className={`bg-indigo-600 w-11 h-11 rounded-full flex items-center justify-center text-white font-semibold`}
               >
-                {userDetails.userName?userDetails.userName.charAt(0).toUpperCase() : '?'}
+                {userDetails.userName
+                  ? userDetails.userName.charAt(0).toUpperCase()
+                  : "?"}
               </div>
 
               <div className="flex-1 min-w-0">
@@ -199,8 +209,8 @@ const Sidebar = ({
                 onClick={() => {
                   setTab(name);
                   selectTab(name);
-                  if(name=="Logout"){
-                    confirmLogout()
+                  if (name == "Logout") {
+                    confirmLogout();
                   }
                 }}
                 className={`

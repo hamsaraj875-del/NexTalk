@@ -27,7 +27,6 @@ const RoomMessage = ({userData,roomData,roomId}) => {
           credentials: "include",
         });
         const result = await response.json();
-        console.log(result);
         if (result.success) {
           setData(result.message);
           setLoader(false);
@@ -63,14 +62,12 @@ const RoomMessage = ({userData,roomData,roomId}) => {
       socket.off("roomMessage");
     };
   }, []);
-  console.log(data);
 
   const messageSend = () => {
     if (message.length == 0) {
       console.log("empty");
       return;
     }
-    console.log(message);
     socket.emit("roomMessage", {
       senderId:userData.userId,
       roomId:roomId,
@@ -123,11 +120,11 @@ const RoomMessage = ({userData,roomData,roomId}) => {
                 .map(({ senderId,senderName,  message, time },index) => (
                   <div
                   key={index}
-                    className={`${senderId == userData.userId ? "right-1 bg-gradient-to-r from-indigo-800 to-indigo-700 self-end rounded-t-2xl rounded-l-2xl" : "left-1 bg-gray-900 self-start rounded-r-2xl rounded-t-2xl"} max-w-140 px-4 py-2 flex flex-col `}
+                    className={`${senderId == userData.userId ? "right-1 bg-gradient-to-r from-indigo-800 to-indigo-700 self-end rounded-t-2xl rounded-l-2xl rounded-b-r-xs" : "left-1 bg-gray-900 self-start rounded-r-2xl rounded-t-2xl rounded-b-l-xs"} max-w-140 px-4 py-2 flex flex-col `}
                   >
-                    {senderId != userData.userId && <p className="text-[15px]" >{senderName}</p>}
+                    {senderId != userData.userId && <p className="text-[10px] text-pink-300" >{senderName}</p>}
                     <p className="text-white text-[16px]">{message}</p>
-                    <p className="text-xs text-gray-500 right-1 self-end">
+                    <p className="text-xs text-gray-400 right-1 self-end">
                       {time}
                     </p>
                   </div>

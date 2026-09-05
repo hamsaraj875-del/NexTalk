@@ -13,6 +13,7 @@ const database = require("../models/database");
 let onlineUser = new Map();
 let onlineSocket = new Map();
 let onlineGroupUser = new Map();
+let onlineGroupSocket = new Map();
 
 //Live time shower
 
@@ -90,28 +91,49 @@ server = async (server) => {
         if (data.users.includes(userId)) {
           const userName = await database.findById(userId);
           onlineGroupUser.set(userId, { roomId, userName: userName.name });
+          onlineGroupSocket.set(socket.id,userId);
           console.log("online group users are :", onlineGroupUser.keys());
-          io.to(roomId).emit("onlineGroupUser", [...onlineGroupUser.values()]);
+          const groupUserList = Array.from(onlineGroupUser,([userId, value]) => ({ userId,...value,}));
+          io.to(roomId).emit("onlineGroupUser", groupUserList);
         }
       } catch (err) {
         console.log(err);
       }
     });
 
-    socket.on("roomMessage", async ({senderId, roomId, message}) => {
+    socket.on("disconnectRoom",({roomId})=>{
+      const userId = onlineGroupSocket.get(socket.id);
+      console.log("hit");
+      if(userId && onlineGroupUser.has(userId)){
+        onlineGroupSocket.delete(socket.id);
+        onlineGroupUser.delete(userId);
+        const groupUserList = Array.from(onlineGroupUser,([userId, value]) => ({ userId,...value,}));
+        io.to(roomId).emit("onlineGroupUser",groupUserList);
+      }
+    })
+
+    socket.on("roomMessage", async ({ senderId, roomId, message }) => {
       try {
         console.log(message);
         const data = await room.findById(roomId);
         const groupUser = onlineGroupUser.get(senderId);
-        if(!groupUser.userName){
+        if (!groupUser.userName) {
           return;
         }
         if (data && data.users.includes(senderId)) {
           const time = timeSetter();
           const userName = groupUser.userName;
-          const details = new roomMessages({roomId,senderId,senderName,message,time});
+          const details = new roomMessages({
+            roomId,
+            senderId,
+            senderName:userName,
+            message,
+            time,
+          });
           await details.save();
-          socket.to(roomId).emit("roomMessage", senderId,senderName,message,time);
+          socket
+            .to(roomId)
+            .emit("roomMessage", senderId, userName, message, time);
         }
       } catch (err) {
         console.log(err);
