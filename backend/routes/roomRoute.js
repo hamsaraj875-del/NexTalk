@@ -14,5 +14,6 @@ roomRoute.post("/join",user,roomController.joinRoom);
 roomRoute.post("/auth/roomAuthenticate",user,roomController.roomDetails);
 roomRoute.post("/messages",user,roomController.roomMessage);
 roomRoute.post("/userDetails",user,roomController.userDetails);
+roomRoute.post("/block",user,roomController.blockUser);
 
 module.exports = roomRoute;

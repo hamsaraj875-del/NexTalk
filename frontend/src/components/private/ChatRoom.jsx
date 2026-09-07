@@ -33,10 +33,17 @@ const ChatRoom = () => {
             signal,
             method: "POST",
             credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({roomId}),
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ roomId }),
           },
         );
+        const result = await response.json();
+        if (!result.success) {
+          navigate("../../");
+          return;
+        }
         const response1 = await fetch(
           `${import.meta.env.VITE_LINK}/chat/room/userDetails`,
           {
@@ -45,54 +52,47 @@ const ChatRoom = () => {
             credentials: "include",
           },
         );
-        const result = await response.json();
         const result1 = await response1.json();
-        if (result1.success) {
-          setUserData(result1.message);
-        }
-        if (!result.success || !result1.success) {
+        if (!result1.success) {
           navigate("../../");
+          return;
+        }
+        setRoomData(result.message);
+        setUserData(result1.message);
+        socket.connect();
+        const joinRoom = () => {
+          socket.emit("joinRoom", roomId, result1.message.userId);
+        };
+        if (socket.connected) {
+          joinRoom();
         } else {
-          setRoomData(result.message);
-          socket.connect();
-          if (socket.connected) {
-            socket.emit("joinRoom", roomId, result1.message.userId);
-          } else {
-            socket.connect();
-            socket.once("connect", () => {
-              socket.emit("joinRoom", roomId, result1.message.userId);
-            });
-          }
+          socket.once("connect", joinRoom);
         }
-        setLoader(false);
-
-        socket.on("onlineGroupUser", (data) => {
-          setGroupList(data);
-        });
+        socket.on("onlineGroupUser", handleOnlineGroupUser);
       } catch (err) {
-        console.log(err);
-        setLoader(false);
-        if (err.name != "AbortError") {
-          navigate("../../");
-          controller.abort();
+        if (err.name === "AbortError") {
+          return;
         }
+        console.log(err);
+        navigate("../../");
       } finally {
         setLoader(false);
       }
     };
     fetcher();
     return () => {
-    controller.abort();
-    socket.off("onlineGroupUser", handleOnlineGroupUser);
-    socket.emit("disconnectRoom", { roomId });
+      controller.abort();
+      socket.off("onlineGroupUser", handleOnlineGroupUser);
+      socket.off("connect");
+      socket.emit("disconnectRoom", { roomId });
     };
-  }, []);
+  }, [roomId, navigate]);
 
   return (
     <div className="w-full h-screen flex overflow-hidden bg-[#090912]">
       <div className="w-72 shrink-0 h-full border-r border-white/10">
         <RoomSidebar
-        userData = {userData}
+          userData={userData}
           roomData={roomData}
           groupList={groupList}
         />

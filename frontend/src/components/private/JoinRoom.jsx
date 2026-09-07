@@ -60,9 +60,8 @@ const JoinRoom = ({ setJoinRoom }) => {
       })
 
       const result = await response.json();
-      console.log(result);
       if(result.success){
-        navigate(`/chat/room/${result.roomId}`);
+        window.open(`/chat/room/${result.roomId}`, "_blank", "noopener,noreferrer");
       }else{
         setErr(result.message);
       }

@@ -38,9 +38,13 @@ const RoomSidebar = ({ roomData, groupList,userData }) => {
   const navigate = useNavigate();
 
   const blockHandler=async({userId})=>{
-    const response = await fetch(`${import.meta.env.VITE_LINK}/block/id=${encodeURIComponent(userId)}`,{
+    console.log(userId);
+    const response = await fetch(`${import.meta.env.VITE_LINK}/block`,{
       method:"POST",
       credentials:"include",
+      body:JSON.stringify({
+        userId,roomId:roomData._id,
+      })
     });
     const result = await response.json();
     if(result){
@@ -134,7 +138,7 @@ const RoomSidebar = ({ roomData, groupList,userData }) => {
                       Owner
                     </span>
                   )}
-                  {userId != roomData.owner && (
+                  {userData.userId == roomData.owner && userId !=roomData.owner && (
                     <span className="cursor-pointer shrink-0 text-[9px] font-bold uppercase tracking-wide flex bg-red-800/20 text-amber-300 px-2 py-0.5 rounded-full items-center justify-center gap-1 text-red-400"><MdBlock className="" />
                       block
                     </span>

@@ -6,6 +6,7 @@ const { check, validationResult } = require("express-validator");
 const room = require("../models/room");
 const roomMessage = require("../models/roomMessages");
 const database = require("../models/database");
+const roomBlock = require("../models/roomBlock");
 
 //room creation
 
@@ -71,7 +72,7 @@ exports.createRoom = [
 
 //room primary details
 exports.roomDetails = async (req, res, next) => {
-  const  {roomId}  = req.body;
+  const { roomId } = req.body || {};
   try {
     const roomDetails = await room
       .findById(roomId)
@@ -98,7 +99,7 @@ exports.roomDetails = async (req, res, next) => {
 
 //room searching
 exports.roomSearch = async (req, res, next) => {
-  const { name } = req.query;
+  const { name } = req.query || {};
   console.log(name);
   try {
     const l = await room
@@ -117,6 +118,8 @@ exports.roomSearch = async (req, res, next) => {
     });
   }
 };
+
+//joining room 
 
 exports.joinRoom = async (req, res, next) => {
   const group = req.body;
@@ -201,6 +204,44 @@ exports.userDetails = (req, res, next) => {
     return res.status(500).json({
       success: false,
       message: "not found",
+    });
+  }
+};
+
+//user blocker
+
+exports.blockUser = async (req, res, next) => {
+  const { userId, roomId } = req.body();
+  console.log("block hit!");
+  try {
+    const room = await room.findOne({ _id: roomId, owner: req.session.userId });
+    const user = await database.findById({ userId });
+    if (!user) {
+      return res.staus(500).json({
+        success: false,
+        message: "user not found",
+      });
+    }
+    if (room && room.users.include(userId)) {
+      const blocker = req.session.userId;
+      const blocked = user._id;
+      const details = new roomBlock({ blocker, blocked });
+      await roomBlock.save();
+      return res.status(200).json({
+        success: true,
+        message: "Blocked the user" + user.name,
+      });
+    }else{
+      return res.status(500).json({
+        success:false,
+        message:"User not found",
+      })
+    }
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error occurred please try again !",
     });
   }
 };

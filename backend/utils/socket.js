@@ -103,7 +103,6 @@ server = async (server) => {
 
     socket.on("disconnectRoom",({roomId})=>{
       const userId = onlineGroupSocket.get(socket.id);
-      console.log("hit");
       if(userId && onlineGroupUser.has(userId)){
         onlineGroupSocket.delete(socket.id);
         onlineGroupUser.delete(userId);
@@ -114,7 +113,6 @@ server = async (server) => {
 
     socket.on("roomMessage", async ({ senderId, roomId, message }) => {
       try {
-        console.log(message);
         const data = await room.findById(roomId);
         const groupUser = onlineGroupUser.get(senderId);
         if (!groupUser.userName) {

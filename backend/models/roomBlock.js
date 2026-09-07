@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
 
 const schema = mongoose.Schema({
-  blocker:{type:String,required},
-  blocked:{type:String,required},
+  blocker:{type:String,required:true},
+  blocked:{type:String,required:true},
 });
 
-module.exports = mongoose.model(schema,"roomBlockers");
+module.exports = mongoose.model("roomBlockers",schema);
