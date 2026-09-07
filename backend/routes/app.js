@@ -34,7 +34,7 @@ const store = MongoStore.create({
 
 app.use(
   cors({
-    origin: ["http://localhost:5173","https://nextalk-server-b0k1.onrender.com"],
+    origin: ["http://localhost:5173","https://nextalk-6d1n.onrender.com"],
     credentials: true,
   })
 );
