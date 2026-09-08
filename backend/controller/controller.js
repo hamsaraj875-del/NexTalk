@@ -15,7 +15,7 @@ exports.authenticate = (req, res, next) => {
       message: "The user is logged in",
     });
   } else {
-    return res.status(500).json({
+    return res.status(401).json({
       success: false,
       message: "The user is not logged in ",
     });

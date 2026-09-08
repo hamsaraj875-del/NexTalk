@@ -39,6 +39,8 @@ app.use(
   })
 );
 
+app.set("trust proxy",1);
+
 app.use(
   session({
     secret: process.env.SECRET_KEY,
@@ -47,6 +49,8 @@ app.use(
     resave: false,
     cookie: {
       httpOnly: true,
+      secure:true,
+      sameSite:"none",
       maxAge: 1000 * 60 * 60 * 24 * 5,
     },
   }),
@@ -61,7 +65,15 @@ app.use("/chat/room",roomRoute);
 //auth controller for is user logged in or not
 
 
-app.post("/auth/authenticate",controller.authenticate);
+app.post("/auth/authenticate", (req, res, next) => {
+  console.log("========== AUTHENTICATE REQUEST ==========");
+  console.log("Session:", req.session);
+  console.log("Session ID:", req.sessionID);
+  console.log("isLoggedIn:", req.session?.isLoggedIn);
+  console.log("userId:", req.session?.userId);
+
+  controller.authenticate(req, res, next);
+});
 app.post("/search",user,controller.searchUsers);
 app.post("/friends",user,controller.friends);
 app.post("/invite",user,controller.invite);
