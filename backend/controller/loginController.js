@@ -52,7 +52,7 @@ exports.signUp = [
       return res.status(400).json({
         success: false,
         message: formattedError,
-        validationError:true,
+        validationError: true,
       });
     }
     if (errors.isEmpty()) {
@@ -67,10 +67,11 @@ exports.signUp = [
           });
         } else {
           req.session.userDetails = { name, email, password };
+          req.session.save();
           const otp = otpGenerator();
           try {
             req.session.otp = otp;
-            await req.session.save();
+            req.session.save();
             await sendOTP(email, otp);
             return res.status(201).json({
               success: true,
@@ -107,12 +108,22 @@ exports.login = async (req, res, next) => {
     const user = await database.findOne({ email: email });
     if (user && (await bcrypt.compare(password, user.password))) {
       req.session.isLoggedIn = true;
-      req.session.userName= user.name;
+      req.session.userName = user.name;
       req.session.userId = user._id;
-      await req.session.save();
-      return res.status(200).json({
-        success: true,
-        message: "Successfully logged in",
+      req.session.save((err) => {
+        if (err) {
+          console.log("Session save error:", err);
+
+          return res.status(500).json({
+            success: false,
+            message: "Failed to save session",
+          });
+        }
+
+        return res.status(200).json({
+          success: true,
+          message: "Successfully logged in",
+        });
       });
     } else {
       return res.status(500).json({
@@ -218,7 +229,7 @@ exports.otp = async (req, res, next) => {
     req.session.userName = name;
     req.session.isLoggedIn = true;
     req.session.userId = details._id;
-    await req.session.save();
+    req.session.save();
     return res.status(200).json({
       success: true,
       message: "Logged in successfully",
@@ -237,6 +248,7 @@ exports.otp = async (req, res, next) => {
 exports.logout = (req, res, next) => {
   if (req.session.isLoggedIn) {
     req.session.isLoggedIn = false;
+    req.session.save();
     return res.status(200).json({
       success: true,
       message: "Logged out successfully",
