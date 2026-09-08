@@ -77,13 +77,13 @@ const Messages = ({ userDetails, friend, setFriend, onlineUser }) => {
       hour12: true,
     });
 
-    setData([
-      ...data,
+    setData((prevData) => [
+      ...prevData,
       {
         senderId: userDetails.userId,
         receiverId: friend.id,
-        message: message,
-        time: time,
+        message,
+        time,
       },
     ]);
 
@@ -141,9 +141,7 @@ const Messages = ({ userDetails, friend, setFriend, onlineUser }) => {
                     <div
                       className={`${senderId == userDetails.userId ? "right-1 bg-gradient-to-r from-indigo-800 to-indigo-700 self-end rounded-t-2xl rounded-l-2xl" : "left-1 bg-gray-900 self-start rounded-r-2xl rounded-t-2xl"} max-w-140 px-4 py-2 flex flex-col `}
                     >
-                      <p className="text-white-400 text-[16px]">  
-                        {message}
-                      </p>
+                      <p className="text-white-400 text-[16px]">{message}</p>
                       <p className="text-xs text-gray-400 right-1 self-end">
                         {time}
                       </p>

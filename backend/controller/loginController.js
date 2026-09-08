@@ -1,7 +1,8 @@
 //external modules
 const bcrypt = require("bcrypt");
 const { check, validationResult } = require("express-validator");
-const nodemailer = require("nodemailer");
+const sgMail = require("@sendgrid/mail");
+sgMail.setApiKey(process.env.EMAIL_API);
 
 //internal modules
 const database = require("../models/database");
@@ -77,7 +78,7 @@ exports.signUp = [
               success: true,
               message: "Otp is sent to the email please check the jmail",
             });
-          } catch {
+          } catch(err) {
             console.log(err);
             return res.status(500).json({
               success: false,
@@ -146,20 +147,11 @@ const otpGenerator = () => {
   return Math.floor(100000 + Math.random() * 900000);
 };
 
-//OTP sender by resend
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_APP_PASSWORD,
-  },
-});
 
 const sendOTP = async (email, otp) => {
   try {
-    const response = await transporter.sendMail({
-      from: `"NexTalk" <${process.env.EMAIL_USER}>`,
+    const msg = {
+      from: `"NexTalk" <${process.env.EMAIL}>`,
       to: email,
       subject: "Verify Your NexTalk Account",
 
@@ -200,7 +192,9 @@ const sendOTP = async (email, otp) => {
 
         </div>
       `,
-    });
+    };
+    const response = await sgMail.send(msg);
+    console.log("Otp is sent");
 
     return response;
   } catch (error) {
