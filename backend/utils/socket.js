@@ -28,11 +28,15 @@ const timeSetter = () => {
 
 server = async (server) => {
   const io = new Server(server, {
-    cors: {
-      origin: "http://localhost:5173",
-      credentials: true,
-    },
-  });
+  cors: {
+    origin: [
+      "http://localhost:5173",
+      "https://nextalk-6d1n.onrender.com",
+    ],
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
   io.on("connection", (socket) => {
     socket.on("register", (userId) => {
       onlineUser.set(userId, socket.id);
