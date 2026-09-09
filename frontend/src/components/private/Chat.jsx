@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 //internal modules
+import VerifyLoader from "../common/VerifyLoader";
 import Friends from "./Friends";
 import Sidebar from "./Sidebar";
 import Messages from "../private/Messages";
@@ -16,13 +17,14 @@ import CreateRoom from "../private/CreateRoom";
 
 const Chat = () => {
   const navigate = useNavigate();
+  const [authChecked, setAuthChecked] = useState(false);
   const [adjust, setAdjust] = useState(false);
   const [notify, setNotify] = useState("");
   const [loader, setLoader] = useState(false);
   const [tab, selectTab] = useState("Search");
   const [userDetails, setUserDetails] = useState("");
   const [createRoom, setCreateRoom] = useState(false);
-  const [joinRoom,setJoinRoom] = useState(false);
+  const [joinRoom, setJoinRoom] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -47,6 +49,7 @@ const Chat = () => {
         socket.once("connect", () => {
           socket.emit("register", result.userId);
         });
+        setAuthChecked(true);
       } catch (err) {
         console.log(err);
         if (err.name != "AbortError") {
@@ -60,6 +63,10 @@ const Chat = () => {
       socket.disconnect();
     };
   }, []);
+
+  if (!authChecked) {
+    return <VerifyLoader />;
+  }
 
   return (
     <>

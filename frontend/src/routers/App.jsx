@@ -10,9 +10,8 @@ import Login from "../components/public/Login";
 import Otp from "../components/public/Otp";
 import Chat from "../components/private/Chat";
 import NotFound from "../components/common/NotFound";
-import Loader from "../components/common/Loader";
+import VerifyLoader from "../components/common/VerifyLoader"
 import ChatRoom from "../components/private/ChatRoom";
-import Confirmation from "../components/common/Confirmation";
 import CreateRoom from "../components/private/CreateRoom";
 import "../App.css";
 
@@ -43,9 +42,6 @@ const Router = createBrowserRouter([
   {
     path:"/chat/room/:roomId",
     element:<ChatRoom />
-  },
-  {path:"/loader",
-    element:<Confirmation />
   },
   {path:"/create",
     element:<CreateRoom />
