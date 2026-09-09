@@ -8,13 +8,21 @@ const messages = require("../models/messages");
 //authenticating the user
 
 exports.authenticate = (req, res, next) => {
-  if (req.session.isLoggedIn) {
-    return res.status(200).json({
-      success: true,
-      userId: req.session.userId,
-      message: "The user is logged in",
-    });
-  } else {
+  try {
+    if (req.session.isLoggedIn) {
+      return res.status(200).json({
+        success: true,
+        userId: req.session.userId,
+        message: "The user is logged in",
+      });
+    }else {
+      return res.status(401).json({
+        success: false,
+        message: "The user is not logged in ",
+      });
+    }
+  } catch (err) {
+    console.log(err);
     return res.status(401).json({
       success: false,
       message: "The user is not logged in ",
@@ -202,7 +210,7 @@ exports.hostDetails = (req, res, next) => {
       message: { userId, userName },
     });
   } else {
-    return res.staus(500).json({
+    return res.status(500).json({
       success: false,
       message: "Unauthorised access please try again later!",
     });

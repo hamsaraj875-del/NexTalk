@@ -68,11 +68,11 @@ exports.signUp = [
           });
         } else {
           req.session.userDetails = { name, email, password };
-          req.session.save();
           const otp = otpGenerator();
           try {
             req.session.otp = otp;
             req.session.save();
+            console.log("otp is generated and otp is ",req.session.otp);
             await sendOTP(email, otp);
             return res.status(201).json({
               success: true,
@@ -209,6 +209,8 @@ exports.otp = async (req, res, next) => {
   try {
     const otp = req.body.otpStr;
     if (otp != req.session.otp) {
+      console.log(otp);
+      console.log(req.session.otp);
       return res.status(500).json({
         success: false,
         message: "Wrong otp",
@@ -240,16 +242,25 @@ exports.otp = async (req, res, next) => {
 //logout
 
 exports.logout = (req, res, next) => {
-  if (req.session.isLoggedIn) {
-    req.session.isLoggedIn = false;
-    req.session.save();
+  if (!req.session.isLoggedIn) {
+    return res.status(400).json({
+      success: false,
+      message: "You are not logged in",
+    });
+  }
+
+  req.session.destroy((err) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).json({
+        success: false,
+        message: "Failed to log out, please try again!",
+      });
+    }
+    res.clearCookie("connect.sid");
     return res.status(200).json({
       success: true,
       message: "Logged out successfully",
     });
-  }
-  return res.status(500).json({
-    success: false,
-    message: "Internal server error please try again !",
   });
 };

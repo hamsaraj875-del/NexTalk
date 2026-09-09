@@ -15,16 +15,7 @@ let onlineSocket = new Map();
 let onlineGroupUser = new Map();
 let onlineGroupSocket = new Map();
 
-//Live time shower
 
-const timeSetter = () => {
-  const time = new Date().toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  });
-  return time;
-};
 
 server = async (server) => {
   const io = new Server(server, {
@@ -58,7 +49,7 @@ server = async (server) => {
         ],
       });
       if (connection && connection.status === "accepted") {
-        const time = timeSetter();
+        const time = new Date();
         if (recieverSocketId) {
           io.to(recieverSocketId).emit(
             "message",
@@ -123,7 +114,7 @@ server = async (server) => {
           return;
         }
         if (data && data.users.includes(senderId)) {
-          const time = timeSetter();
+          const time = new Date();
           const userName = groupUser.userName;
           const details = new roomMessages({
             roomId,

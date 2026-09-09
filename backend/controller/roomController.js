@@ -100,7 +100,6 @@ exports.roomDetails = async (req, res, next) => {
 //room searching
 exports.roomSearch = async (req, res, next) => {
   const { name } = req.query || {};
-  console.log(name);
   try {
     const l = await room
       .find({ name: { $regex: name, $options: "i" } })

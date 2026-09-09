@@ -5,7 +5,7 @@ const schema = mongoose.Schema({
   senderId:{ref:"database",type:String,required:true},
   senderName:{type:String,required:true},
   message:{type:String,required:true},
-  time:{type:String,required:true},
+  time:{type:Date,default:Date.now},
 });
 
 module.exports = mongoose.model("roomMessages",schema);

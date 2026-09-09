@@ -41,6 +41,8 @@ app.use(
 
 app.set("trust proxy",1);
 
+const isProd = process.env.NODE_ENV === "production";
+
 app.use(
   session({
     secret: process.env.SECRET_KEY,
@@ -49,8 +51,8 @@ app.use(
     resave: false,
     cookie: {
       httpOnly: true,
-      secure:true,
-      sameSite:"none",
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
       maxAge: 1000 * 60 * 60 * 24 * 5,
     },
   }),
