@@ -62,10 +62,8 @@ const Friends = ({ tab, setFriend, friend, onlineUser }) => {
             },
           );
           const result = await response.json();
-          console.log(result);
-          setNotificationList(result.message);
           if (result.success) {
-            setFriendsList(result.message);
+            setNotificationList(result.message);
           }
         } catch (err) {
           console.log(err);

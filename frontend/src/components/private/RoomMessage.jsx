@@ -10,7 +10,7 @@ import { IoArrowBackOutline } from "react-icons/io5";
 //internal modules
 import Loader from "../common/Loader";
 
-const RoomMessage = ({userData,roomData,roomId}) => {
+const RoomMessage = ({ userData, roomData, roomId }) => {
   const [message, setMessage] = useState("");
   const [data, setData] = useState([]);
   const [loader, setLoader] = useState(false);
@@ -21,11 +21,14 @@ const RoomMessage = ({userData,roomData,roomId}) => {
     setLoader(true);
     const fetcher = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_LINK}/chat/room/messages/?roomId=${encodeURIComponent(roomId)}`, {
-          signal,
-          method: "POST",
-          credentials: "include",
-        });
+        const response = await fetch(
+          `${import.meta.env.VITE_LINK}/chat/room/messages/?roomId=${encodeURIComponent(roomId)}`,
+          {
+            signal,
+            method: "POST",
+            credentials: "include",
+          },
+        );
         const result = await response.json();
         if (result.success) {
           setData(result.message);
@@ -46,12 +49,12 @@ const RoomMessage = ({userData,roomData,roomId}) => {
   }, []);
 
   useEffect(() => {
-    socket.on("roomMessage", (senderId,senderName, message, time) => {
+    socket.on("roomMessage", (senderId, senderName, message, time) => {
       setData((prevData) => [
         ...prevData,
         {
           senderId: senderId,
-          senderName:senderName,
+          senderName: senderName,
           message: message,
           time: time,
         },
@@ -69,8 +72,8 @@ const RoomMessage = ({userData,roomData,roomId}) => {
       return;
     }
     socket.emit("roomMessage", {
-      senderId:userData.userId,
-      roomId:roomId,
+      senderId: userData.userId,
+      roomId: roomId,
       message,
     });
 
@@ -84,7 +87,7 @@ const RoomMessage = ({userData,roomData,roomId}) => {
       ...data,
       {
         senderId: userData.userId,
-        senderName:userData.userName,
+        senderName: userData.userName,
         message: message,
         time: time,
       },
@@ -109,26 +112,30 @@ const RoomMessage = ({userData,roomData,roomId}) => {
             />
             <p className="text-xl">{roomData.name}</p>
           </div>
-          
         </div>
         <div className="w-full flex-1 min-h-0 flex bg-cover bg-center ">
           {loader ? (
             <Loader />
           ) : (
             <div className="w-full  h-full overflow-y-scroll scrollbar-none flex flex-col gap-4 px-6 py-6">
-              {data
-                .map(({ senderId,senderName,  message, time },index) => (
-                  <div
+              {data.map(({ senderId, senderName, message, time }, index) => (
+                <div
                   key={index}
-                    className={`${senderId == userData.userId ? "right-1 bg-gradient-to-r from-indigo-800 to-indigo-700 self-end rounded-t-2xl rounded-l-2xl rounded-b-r-xs" : "left-1 bg-gray-900 self-start rounded-r-2xl rounded-t-2xl rounded-b-l-xs"} max-w-140 px-4 py-2 flex flex-col `}
-                  >
-                    {senderId != userData.userId && <p className="text-[10px] text-pink-300" >{senderName}</p>}
-                    <p className="text-white text-[16px]">{message}</p>
-                    <p className="text-xs text-gray-400 right-1 self-end">
-                      {time}
-                    </p>
-                  </div>
-                ))}
+                  className={`${senderId == userData.userId ? "right-1 bg-gradient-to-r from-indigo-800 to-indigo-700 self-end rounded-t-2xl rounded-l-2xl rounded-b-r-xs" : "left-1 bg-gray-900 self-start rounded-r-2xl rounded-t-2xl rounded-b-l-xs"} max-w-140 px-4 py-2 flex flex-col `}
+                >
+                  {senderId != userData.userId && (
+                    <p className="text-[10px] text-pink-300">{senderName}</p>
+                  )}
+                  <p className="text-white text-[16px]">{message}</p>
+                  <p className="text-xs text-gray-400 right-1 self-end">
+                    {new Date(time).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
+                  </p>
+                </div>
+              ))}
             </div>
           )}
         </div>

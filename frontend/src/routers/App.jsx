@@ -1,7 +1,7 @@
 //External modules
 
 import { useState } from "react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider,Navigate } from "react-router-dom";
 
 //files 
 
@@ -18,6 +18,10 @@ import "../App.css";
 
 
 const Router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Navigate to="/chat" replace />,
+  },
   {
     path: "/auth",
     element: <Auth />,

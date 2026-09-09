@@ -71,11 +71,7 @@ const Messages = ({ userDetails, friend, setFriend, onlineUser }) => {
       message,
     });
 
-    const time = new Date().toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
+    const time = new Date();
 
     setData((prevData) => [
       ...prevData,
@@ -143,7 +139,11 @@ const Messages = ({ userDetails, friend, setFriend, onlineUser }) => {
                     >
                       <p className="text-white-400 text-[16px]">{message}</p>
                       <p className="text-xs text-gray-400 right-1 self-end">
-                        {time}
+                        {new Date(time).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true,
+                        })}
                       </p>
                     </div>
                   ))}

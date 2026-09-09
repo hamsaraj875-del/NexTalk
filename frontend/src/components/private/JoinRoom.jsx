@@ -10,7 +10,7 @@ const JoinRoom = ({ setJoinRoom }) => {
   const navigate = useNavigate();
   const [groupList, setGroupList] = useState([]);
   const [search, setSearch] = useState("");
-  const [password, setPasswords] = useState({});
+  const [passwords, setPasswords] = useState({});
   const [err, setErr] = useState("");
   const [loader, setLoader] = useState(false);
 

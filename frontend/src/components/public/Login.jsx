@@ -77,8 +77,6 @@ const Login = () => {
 
       const result = await response.json();
 
-      console.log(result);
-
       if (result.success && userState === "signUp") {
         navigate("../otp");
       } else if (result.success && userState === "login") {
