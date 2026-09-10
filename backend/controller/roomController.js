@@ -8,6 +8,7 @@ const roomMessage = require("../models/roomMessages");
 const database = require("../models/database");
 const roomBlock = require("../models/roomBlock");
 
+
 //room creation
 
 exports.createRoom = [
@@ -118,7 +119,7 @@ exports.roomSearch = async (req, res, next) => {
   }
 };
 
-//joining room 
+//joining room
 
 exports.joinRoom = async (req, res, next) => {
   const group = req.body;
@@ -206,41 +207,80 @@ exports.userDetails = (req, res, next) => {
     });
   }
 };
-
-//user blocker
-
 exports.blockUser = async (req, res, next) => {
-  const { userId, roomId } = req.body();
-  console.log("block hit!");
+  const { userId, roomId } = req.body;
+  const blockerId = req.session.userId;
+
   try {
-    const room = await room.findOne({ _id: roomId, owner: req.session.userId });
-    const user = await database.findById({ userId });
-    if (!user) {
-      return res.staus(500).json({
+    if (!userId || !roomId) {
+      return res.status(400).json({
         success: false,
-        message: "user not found",
+        message: "userId and roomId are required",
       });
     }
-    if (room && room.users.include(userId)) {
-      const blocker = req.session.userId;
-      const blocked = user._id;
-      const details = new roomBlock({ blocker, blocked });
-      await roomBlock.save();
-      return res.status(200).json({
-        success: true,
-        message: "Blocked the user" + user.name,
+
+    if (userId === blockerId) {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot block yourself",
       });
-    }else{
-      return res.status(500).json({
-        success:false,
-        message:"User not found",
-      })
     }
+
+    const roomData = await room.findOne({ _id: roomId, owner: blockerId });
+    if (!roomData) {
+      return res.status(404).json({
+        success: false,
+        message: "Room not found or you're not the owner",
+      });
+    }
+
+    if (!roomData.users.includes(userId)) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found in this room",
+      });
+    }
+
+    const targetUser = await database.findById(userId);
+    if (!targetUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const alreadyBlocked = await roomBlock.findOne({
+      blocker: blockerId,
+      blocked: userId,
+      room: roomId,
+    });
+
+    if (alreadyBlocked) {
+      return res.status(409).json({
+        success: false,
+        message: "User is already blocked",
+      });
+    }
+
+    const blockEntry = new roomBlock({
+      blocker: blockerId,
+      blocked: userId,
+      room: roomId,
+    });
+    await blockEntry.save();
+
+    roomData.users = roomData.users.filter((id) => id.toString() !== userId);
+    await roomData.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `Blocked user ${targetUser.name}`,
+    });
   } catch (err) {
-    console.log(err);
+    console.error("blockUser error:", err);
     return res.status(500).json({
       success: false,
-      message: "Internal server error occurred please try again !",
+      message: "Internal server error occurred, please try again!",
     });
   }
 };

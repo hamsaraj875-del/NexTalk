@@ -5,8 +5,10 @@ import { MdBlock } from "react-icons/md";
 //external modules 
 
 import {useNavigate} from "react-router-dom";
+import {useState} from "react";
 
-const RoomSidebar = ({ roomData, groupList,userData }) => {
+const RoomSidebar = ({ setGroupList,roomData, groupList,userData }) => {
+  const [blockingUserId, setBlockingUserId] = useState(null);
   const avatarColors = {
     A: "bg-[#155E75]",
     B: "bg-[#1E40AF]",
@@ -37,23 +39,34 @@ const RoomSidebar = ({ roomData, groupList,userData }) => {
   };
   const navigate = useNavigate();
 
-  const blockHandler=async({userId})=>{
-    console.log(userId);
-    const response = await fetch(`${import.meta.env.VITE_LINK}/block`,{
-      method:"POST",
-      credentials:"include",
-      body:JSON.stringify({
-        userId,roomId:roomData._id,
-      })
+  const blockHandler = async ({ userId }) => {
+  setBlockingUserId(userId);
+  try {
+    const response = await fetch(`${import.meta.env.VITE_LINK}/chat/room/block`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId,
+        roomId: roomData._id,
+      }),
     });
     const result = await response.json();
-    if(result){
-      groupList.filter(user=>user.userId!=userId);
-      if(userData.userId==userId){
+
+    if (result.success) {
+      setGroupList((prev) => prev.filter((user) => user.userId != userId));
+      if (userData.userId == userId) {
         navigate("../../");
       }
+    } else {
+      console.error("Block failed:", result.message);
     }
+  } catch (err) {
+    console.error("blockHandler error:", err);
+  } finally {
+    setBlockingUserId(null);
   }
+};
 
   return (
     <div className="flex flex-col h-full gap-4 p-4 bg-[#0a0a12]">
@@ -139,7 +152,7 @@ const RoomSidebar = ({ roomData, groupList,userData }) => {
                     </span>
                   )}
                   {userData.userId == roomData.owner && userId !=roomData.owner && (
-                    <span className="cursor-pointer shrink-0 text-[9px] font-bold uppercase tracking-wide flex bg-red-800/20 text-amber-300 px-2 py-0.5 rounded-full items-center justify-center gap-1 text-red-400"><MdBlock className="" />
+                    <span onClick={()=>blockHandler({userId})} className="cursor-pointer shrink-0 text-[9px] font-bold uppercase tracking-wide flex bg-red-800/20 text-amber-300 px-2 py-0.5 rounded-full items-center justify-center gap-1 text-red-400"><MdBlock className="" />
                       block
                     </span>
                   )}

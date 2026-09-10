@@ -1,6 +1,7 @@
 //external modules
 import { useState, useEffect } from "react";
 import socket from "../private/socket";
+import {useNavigate} from "react-router-dom"
 
 //react icons
 import { BsFillSendFill } from "react-icons/bs";
@@ -11,6 +12,7 @@ import { IoArrowBackOutline } from "react-icons/io5";
 import Loader from "../common/Loader";
 
 const RoomMessage = ({ userData, roomData, roomId }) => {
+  const navigate = useNavigate();
   const [message, setMessage] = useState("");
   const [data, setData] = useState([]);
   const [loader, setLoader] = useState(false);
@@ -33,6 +35,8 @@ const RoomMessage = ({ userData, roomData, roomId }) => {
         if (result.success) {
           setData(result.message);
           setLoader(false);
+        }else{
+          navigate("../../");
         }
       } catch (err) {
         console.log(err);

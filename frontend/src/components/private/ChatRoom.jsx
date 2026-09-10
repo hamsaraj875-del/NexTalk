@@ -19,7 +19,6 @@ const ChatRoom = () => {
   const handleOnlineGroupUser = (data) => {
     if (Array.isArray(data)) setGroupList(data);
   };
-
   const navigate = useNavigate();
   useEffect(() => {
     const controller = new AbortController();
@@ -95,6 +94,7 @@ const ChatRoom = () => {
           userData={userData}
           roomData={roomData}
           groupList={groupList}
+          setGroupList={setGroupList}
         />
       </div>
 
