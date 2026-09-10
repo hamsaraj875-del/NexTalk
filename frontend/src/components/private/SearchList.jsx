@@ -19,7 +19,7 @@ const SearchList = ({ searchList, setSearchList }) => {
         setSearchList((prev) =>
           prev.map((user) =>
             user.userId === userId
-              ? { ...user, userStatus: "pending" }
+              ? { ...user, userStatus: "pending_sent" }
               : user,
           ),
         );
@@ -28,6 +28,29 @@ const SearchList = ({ searchList, setSearchList }) => {
     } catch (err) {
       console.log(err);
       setErr("Internal server error please try  again later");
+    }
+  };
+
+  const acceptInvitation = async (userId, userName) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_LINK}/accept`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: userId, name: userName }),
+        credentials: "include",
+      });
+      const result = await response.json();
+      if (result.success) {
+        setSearchList((prev) =>
+          prev.map((user) =>
+            user.userId === userId ? { ...user, userStatus: "accepted" } : user,
+          ),
+        );
+      }
+      setErr(result.message);
+    } catch (err) {
+      console.log(err);
+      setErr("Internal server error please try again later");
     }
   };
 
@@ -76,18 +99,26 @@ const SearchList = ({ searchList, setSearchList }) => {
                   <p className="text-[11px] text-gray-500 mt-0.5">
                     {userStatus === "accepted"
                       ? "Friends"
-                      : userStatus === "pending"
+                      : userStatus === "pending_sent"
                         ? "Invitation pending"
-                        : "Add to your friends"}
+                        : userStatus === "pending_received"
+                          ? "Sent you a request"
+                          : "Add to your friends"}
                   </p>
                 </div>
               </div>
 
               <button
                 onClick={() => {
-                  sendInvitation(userId, userName);
+                  if (userStatus === "pending_received") {
+                    acceptInvitation(userId, userName);
+                  } else {
+                    sendInvitation(userId, userName);
+                  }
                 }}
-                disabled={userStatus === "pending" || userStatus === "accepted"}
+                disabled={
+                  userStatus === "pending_sent" || userStatus === "accepted"
+                }
                 className={`
             shrink-0
             min-w-[85px]
@@ -109,19 +140,31 @@ const SearchList = ({ searchList, setSearchList }) => {
                   hover:-translate-y-0.5
                   active:scale-95
                 `
-                : userStatus === "pending"
+                : userStatus === "pending_sent"
                   ? `
                     bg-yellow-500/10
                     text-yellow-400
                     border border-yellow-500/20
                     cursor-not-allowed
                   `
-                  : `
-                    bg-indigo-500/10
-                    text-indigo-400
-                    border border-indigo-500/20
-                    cursor-not-allowed
-                  `
+                  : userStatus === "pending_received"
+                    ? `
+                      bg-gradient-to-r from-emerald-400 to-green-500
+                      text-black
+                      shadow-md shadow-green-500/10
+                      hover:from-emerald-300
+                      hover:to-green-400
+                      cursor-pointer
+                      hover:shadow-lg hover:shadow-green-500/20
+                      hover:-translate-y-0.5
+                      active:scale-95
+                    `
+                    : `
+                      bg-indigo-500/10
+                      text-indigo-400
+                      border border-indigo-500/20
+                      cursor-not-allowed
+                    `
             }
 
             disabled:opacity-70
@@ -129,9 +172,11 @@ const SearchList = ({ searchList, setSearchList }) => {
               >
                 {userStatus === "none"
                   ? "＋ Invite"
-                  : userStatus === "pending"
+                  : userStatus === "pending_sent"
                     ? "Request Sent"
-                    : "Friends"}
+                    : userStatus === "pending_received"
+                      ? "Accept"
+                      : "Friends"}
               </button>
             </div>
           ))

@@ -15,7 +15,7 @@ exports.authenticate = (req, res, next) => {
         userId: req.session.userId,
         message: "The user is logged in",
       });
-    }else {
+    } else {
       return res.status(401).json({
         success: false,
         message: "The user is not logged in ",
@@ -88,10 +88,23 @@ exports.searchUsers = async (req, res, next) => {
             { user1: user._id, user2: req.session.userId },
           ],
         });
+
+        let userStatus = "none";
+        if (friend) {
+          if (friend.status === "accepted") {
+            userStatus = "accepted";
+          } else if (friend.status === "pending") {
+            userStatus =
+              friend.user1.toString() === req.session.userId
+                ? "pending_sent"
+                : "pending_received";
+          }
+        }
+
         return {
           userId: user._id,
           userName: user.name,
-          userStatus: friend?.status || "none",
+          userStatus,
         };
       }),
     );
@@ -114,15 +127,58 @@ exports.invite = async (req, res, next) => {
   const { userId: user2, userName: name } = req.body;
   try {
     const user1 = req.session.userId;
-    const data = await friends.findOne({ user1: user1, user2: user2 });
+
+    if (user1 === user2) {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot send a friend request to yourself",
+      });
+    }
+
+    const data = await friends.findOne({
+      user1: user1,
+      user2: user2,
+      status: "pending",
+    });
     if (data) {
-      console.log(data);
       return res.json({
         success: false,
         message:
           "Invitation is already sent please wait util the user accept !",
       });
     }
+
+    let check = await friends.findOne({
+      $or: [
+        { user1: user1, user2: user2, status: "accepted" },
+        { user2: user1, user1: user2, status: "accepted" },
+      ],
+    });
+    if (check) {
+      return res.status(500).json({
+        success: false,
+        message: "Your guys are already friends",
+      });
+    }
+
+    check = await friends.findOne({
+      user1: user2,
+      user2: user1,
+      status: "pending",
+    });
+    if (check) {
+      const result = await friends.findOneAndUpdate(
+        { user1: user2, user2: user1, status: "pending" },
+        { $set: { status: "accepted" } },
+      );
+      if (result) {
+        return res.status(200).json({
+          success: true,
+          message: "Now " + name + " is your friend",
+        });
+      }
+    }
+
     const status = "pending";
     const details = new friends({ user1, user2, status });
     await details.save();
