@@ -21,7 +21,6 @@ const Sidebar = ({
     { icon: FaSearchengin, name: "Search" },
     { icon: MdOutlineGroup, name: "Friends" },
     { icon: IoNotificationsOutline, name: "Notifications" },
-    { icon: IoSettingsOutline, name: "Settings" },
     { icon: MdLogout, name: "Logout" },
   ];
   const [open, setOpen] = useState(true);

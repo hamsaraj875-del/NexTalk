@@ -2,6 +2,9 @@
 const express = require("express");
 const limiter = require("express-rate-limit");
 
+//internal modules
+const roomBlock = require("../models/roomBlock");
+
 //chat logged user
 
 exports.user = (req, res, next) => {
@@ -10,22 +13,21 @@ exports.user = (req, res, next) => {
   } else {
     return res.status(201).json({
       success: false,
-      unauthorised:true,
+      unauthorised: true,
       message: "User not found please log in first!",
     });
   }
 };
 
-
-
 //room protector
 
-exports.protector = (req,res,next)=>{
-  if(req.session.roomId == req.params.roomId){
-    next();
+exports.protector = async (req, res, next) => {
+  const block = await roomBlock.findOne({ blocked: req.session.userId });
+  if (block) {
+    return res.status(500).json({
+      success: false,
+      message: "unauthorized access",
+    });
   }
-  return res.status(500).json({
-    success:false,
-    message:"unauthorized access",
-  })
-}
+  next();
+};

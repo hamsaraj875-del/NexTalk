@@ -1,13 +1,11 @@
 //react icons
 import { MdBlock } from "react-icons/md";
 
+//external modules
+import socket from "./socket";
+import { useState } from "react";
 
-//external modules 
-
-import {useNavigate} from "react-router-dom";
-import {useState} from "react";
-
-const RoomSidebar = ({ setGroupList,roomData, groupList,userData }) => {
+const RoomSidebar = ({ setGroupList, roomData, groupList, userData }) => {
   const [blockingUserId, setBlockingUserId] = useState(null);
   const avatarColors = {
     A: "bg-[#155E75]",
@@ -37,36 +35,38 @@ const RoomSidebar = ({ setGroupList,roomData, groupList,userData }) => {
     Y: "bg-[#86198F]",
     Z: "bg-[#15803D]",
   };
-  const navigate = useNavigate();
 
   const blockHandler = async ({ userId }) => {
-  setBlockingUserId(userId);
-  try {
-    const response = await fetch(`${import.meta.env.VITE_LINK}/chat/room/block`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId,
-        roomId: roomData._id,
-      }),
-    });
-    const result = await response.json();
+    setBlockingUserId(userId);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_LINK}/chat/room/block`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId,
+            roomId: roomData._id,
+          }),
+        },
+      );
+      const result = await response.json();
 
-    if (result.success) {
-      setGroupList((prev) => prev.filter((user) => user.userId != userId));
-      if (userData.userId == userId) {
-        navigate("../../");
+      if (result.success) {
+        setGroupList((prev) =>
+          prev.filter((user) => String(user.userId) !== String(userId)),
+        );
+        socket.emit("blockUser", { userId, roomId: roomData._id });
+      } else {
+        console.error("Block failed:", result.message);
       }
-    } else {
-      console.error("Block failed:", result.message);
+    } catch (err) {
+      console.error("blockHandler error:", err);
+    } finally {
+      setBlockingUserId(null);
     }
-  } catch (err) {
-    console.error("blockHandler error:", err);
-  } finally {
-    setBlockingUserId(null);
-  }
-};
+  };
 
   return (
     <div className="flex flex-col h-full gap-4 p-4 bg-[#0a0a12]">
@@ -151,11 +151,16 @@ const RoomSidebar = ({ setGroupList,roomData, groupList,userData }) => {
                       Owner
                     </span>
                   )}
-                  {userData.userId == roomData.owner && userId !=roomData.owner && (
-                    <span onClick={()=>blockHandler({userId})} className="cursor-pointer shrink-0 text-[9px] font-bold uppercase tracking-wide flex bg-red-800/20 text-amber-300 px-2 py-0.5 rounded-full items-center justify-center gap-1 text-red-400"><MdBlock className="" />
-                      block
-                    </span>
-                  )}
+                  {userData.userId == roomData.owner &&
+                    userId != roomData.owner && (
+                      <span
+                        onClick={() => blockHandler({ userId })}
+                        className="cursor-pointer shrink-0 text-[9px] font-bold uppercase tracking-wide flex bg-red-800/20 text-amber-300 px-2 py-0.5 rounded-full items-center justify-center gap-1 text-red-400"
+                      >
+                        <MdBlock className="" />
+                        block
+                      </span>
+                    )}
                 </h2>
                 <p className="text-[10px] text-gray-500">Active now</p>
               </div>

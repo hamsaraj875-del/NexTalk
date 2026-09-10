@@ -152,10 +152,7 @@ const Messages = ({ userDetails, friend, setFriend, onlineUser }) => {
           </div>
           <div className="w-full h-26 px-6 py-2">
             <div className=" h-15 px-4 py-2 bg-black border border-gray-800 rounded-2xl flex justify-center items-center">
-              <FaPlus
-                size={25}
-                className=" cursor-pointer mr-4 text-gray-400 hover:text-white"
-              />
+              
               <input
                 value={message}
                 onKeyDown={(e) => {

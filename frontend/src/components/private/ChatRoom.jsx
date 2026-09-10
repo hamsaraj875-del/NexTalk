@@ -87,6 +87,18 @@ const ChatRoom = () => {
     };
   }, [roomId, navigate]);
 
+  useEffect(() => {
+    const handleBlocked = (data) => {
+      if (String(data.roomId) === String(roomId)) {
+        navigate("../../");
+      }
+    };
+    socket.on("youWereBlocked", handleBlocked);
+    return () => {
+      socket.off("youWereBlocked", handleBlocked);
+    };
+  }, [roomId, navigate]);
+
   return (
     <div className="w-full h-screen flex overflow-hidden bg-[#090912]">
       <div className="w-72 shrink-0 h-full border-r border-white/10">

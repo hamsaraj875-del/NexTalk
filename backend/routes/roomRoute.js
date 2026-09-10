@@ -11,8 +11,8 @@ const roomController = require("../controller/roomController");
 roomRoute.post("/",user,roomController.createRoom);
 roomRoute.get("/search",user,roomController.roomSearch);
 roomRoute.post("/join",user,roomController.joinRoom);
-roomRoute.post("/auth/roomAuthenticate",user,roomController.roomDetails);
-roomRoute.post("/messages",user,roomController.roomMessage);
+roomRoute.post("/auth/roomAuthenticate",protector,user,roomController.roomDetails);
+roomRoute.post("/messages",user,protector,roomController.roomMessage);
 roomRoute.post("/userDetails",user,roomController.userDetails);
 roomRoute.post("/block",user,roomController.blockUser);
 
